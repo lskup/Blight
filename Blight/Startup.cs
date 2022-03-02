@@ -1,3 +1,4 @@
+using Blight.Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -32,6 +33,8 @@ namespace Blight
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Blight", Version = "v1" });
             });
+            services.AddDbContext<BlightDbContext>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
