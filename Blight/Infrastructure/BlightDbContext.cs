@@ -12,25 +12,13 @@ namespace Blight.Infrastructure
 {
     public class BlightDbContext:DbContext
     {
-        IConfiguration _configuration;
 
-        public BlightDbContext(IConfiguration configuration)
-        {
-            _configuration = configuration;
+        public BlightDbContext(DbContextOptions<BlightDbContext> options) : base(options)
+        { 
         }
 
         public DbSet<User> Users { get; set; }
         public DbSet<PhoneNumber> PhoneNumbers { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlServer(_configuration.GetConnectionString("DefaultConnection"));
-        }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-        }
 
     }
 }

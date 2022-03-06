@@ -10,30 +10,35 @@ namespace Blight.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PhoneNumberController : ControllerBase
+    public class PhoneNumbersController : ControllerBase
     {
+        // GET: api/<PhoneNumbersController>
         [HttpGet]
         public IEnumerable<string> Get()
         {
             return new string[] { "value1", "value2" };
         }
 
+        // GET api/<PhoneNumbersController>/5
         [HttpGet("{id}")]
         public string Get(int id)
         {
             return "value";
         }
 
+        // POST api/<PhoneNumbersController>
         [HttpPost]
         public void Post([FromBody] string value)
         {
         }
 
+        // PUT api/<PhoneNumbersController>/5
         [HttpPut("{id}")]
         public void Put(int id, [FromBody] string value)
         {
         }
 
+        // DELETE api/<PhoneNumbersController>/5
         [HttpDelete("{id}")]
         public void Delete(int id)
         {

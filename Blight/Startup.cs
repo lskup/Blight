@@ -12,6 +12,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Blight.Interfaces;
+using Blight.Services;
 
 namespace Blight
 {
@@ -33,7 +36,11 @@ namespace Blight
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Blight", Version = "v1" });
             });
-            services.AddDbContext<BlightDbContext>();
+            services.AddDbContext<BlightDbContext>(cfg =>
+            cfg.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddAutoMapper(typeof(Startup));
+            services.AddScoped<IUserService, UserService>();
+
 
         }
 
