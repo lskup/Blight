@@ -17,11 +17,13 @@ namespace Blight.Services
 
         private readonly BlightDbContext _blightDbContext;
         private readonly IMapper _mapper;
+        private readonly IAuxiliary<PhoneNumber> _auxiliary;
 
-        public PhoneNumberService(BlightDbContext blightDbContext, IMapper mapper)
+        public PhoneNumberService(BlightDbContext blightDbContext, IMapper mapper, IAuxiliary<PhoneNumber> auxiliary)
         {
             _blightDbContext = blightDbContext;
             _mapper = mapper;
+            _auxiliary = auxiliary;
         }
 
 
@@ -93,67 +95,42 @@ namespace Blight.Services
 
             var newPhoneNumber = _mapper.Map<PhoneNumber>(dto);
 
-            var existingPhoneNumber = await _blightDbContext.PhoneNumbers
-                .SingleOrDefaultAsync(t => t.Prefix == dto.Prefix && t.Number == dto.Number);
+            var isUpdated = await _auxiliary.UpdateIfExist(newPhoneNumber);
 
-            if(existingPhoneNumber != null)
+            if(isUpdated)
             {
-                newPhoneNumber.Id = existingPhoneNumber.Id;
-                newPhoneNumber.Notified = existingPhoneNumber.Notified;
-                newPhoneNumber.Notified++;
-
-                if(newPhoneNumber.IsBully == false)
-                {
-                    if (newPhoneNumber.Notified > 20)
-                        newPhoneNumber.IsBully = true;
-                }
-
-                _blightDbContext.Entry(existingPhoneNumber)
-                    .CurrentValues
-                    .SetValues(newPhoneNumber);
-
-                await _blightDbContext.SaveChangesAsync();
                 return newPhoneNumber;
             }
 
             newPhoneNumber.Notified++;
 
-            var result = _blightDbContext.PhoneNumbers
-                .Add(newPhoneNumber);
+            var isAdded = await _auxiliary.TryAddToDb(newPhoneNumber));
+            if(isAdded)
+            {
+                return newPhoneNumber;
 
-            await _blightDbContext.SaveChangesAsync();
+            }
+            return null;
 
-            return result.Entity;
         }
 
         public async Task<bool> Put(int id, PhoneNumberDto dto)
         {
-            var updatedNumber = _mapper.Map<PhoneNumber>(dto);
+            var newPhoneNumber = _mapper.Map<PhoneNumber>(dto);
 
-            var locatedNumber = await _blightDbContext.PhoneNumbers
-                .SingleOrDefaultAsync(x => x.Id == id);
+            var isExistingInDb = await _auxiliary.FindById(id);
 
-            if (locatedNumber is null)
+            if(!isExistingInDb)
             {
                 return false;
             }
 
-            var existingNumber = await _blightDbContext.PhoneNumbers
-                .SingleOrDefaultAsync(k => k.Prefix == dto.Prefix && k.Number == dto.Number);
-                
-            if(existingNumber != null)
+            var isUpdated = await _auxiliary.UpdateIfExist(newPhoneNumber);
+
+            if(!isUpdated)
             {
                 return false;
             }
-
-            updatedNumber.Id = id;
-            updatedNumber.Notified = locatedNumber.Notified;
-            
-
-            _blightDbContext.Entry(locatedNumber).CurrentValues
-                .SetValues(updatedNumber);
-
-            await _blightDbContext.SaveChangesAsync();
 
             return true;
         }
