@@ -40,6 +40,7 @@ namespace Blight
             cfg.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddAutoMapper(typeof(Startup));
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IPhoneNumberService, PhoneNumberService>();
 
 
         }

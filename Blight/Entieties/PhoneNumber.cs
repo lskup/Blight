@@ -14,13 +14,16 @@ namespace Blight.Entieties
         public int Notified { get; set; }
         public bool IsBully
         {
-            get => IsBully;
-            set
+            get
             {
-                if (Notified <= 20)
-                    value = false;
+                if(Notified<=20)
+                {
+                    return false;
+                }
                 else
-                    value = true;
+                {
+                    return true;
+                }
             }
         }
     }
