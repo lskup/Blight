@@ -71,15 +71,14 @@ namespace Blight.Services
                 var phoneNumbers = await _blightDbContext.PhoneNumbers
                 .ToListAsync();
 
-
                 return phoneNumbers;
             }
 
             var bullyPhoneNumbers = await _blightDbContext.PhoneNumbers
-                .Where(n => n.IsBully == true)
+                .Where(x => x.IsBully == true)
                 .ToListAsync();
-
-
+            
+                
 
             return bullyPhoneNumbers;
 
@@ -102,6 +101,12 @@ namespace Blight.Services
                 newPhoneNumber.Id = existingPhoneNumber.Id;
                 newPhoneNumber.Notified = existingPhoneNumber.Notified;
                 newPhoneNumber.Notified++;
+
+                if(newPhoneNumber.IsBully == false)
+                {
+                    if (newPhoneNumber.Notified > 20)
+                        newPhoneNumber.IsBully = true;
+                }
 
                 _blightDbContext.Entry(existingPhoneNumber)
                     .CurrentValues
