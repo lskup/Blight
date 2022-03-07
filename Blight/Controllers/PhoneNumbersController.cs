@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Blight.Entieties;
+using Blight.Interfaces;
+using Blight.Models;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,36 +15,79 @@ namespace Blight.Controllers
     [ApiController]
     public class PhoneNumbersController : ControllerBase
     {
-        // GET: api/<PhoneNumbersController>
+        IPhoneNumberService _phoneNumberService;
+
+        public PhoneNumbersController(IPhoneNumberService userService)
+        {
+            _phoneNumberService = userService;
+        }
+
+        // GET: api/<UsersController>
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<ActionResult<IEnumerable<PhoneNumber>>> GetAll(bool onlyBullyNumbers)
         {
-            return new string[] { "value1", "value2" };
+            return Ok(await _phoneNumberService.GetAll(onlyBullyNumbers));
         }
 
-        // GET api/<PhoneNumbersController>/5
+        // GET api/<UsersController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<ActionResult<PhoneNumberDto>> Get(int id)
         {
-            return "value";
+            var result = await _phoneNumberService.Get(id);
+            if (result == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(result);
         }
 
-        // POST api/<PhoneNumbersController>
+        // POST api/<UsersController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<ActionResult<PhoneNumber>> Post([FromBody] PhoneNumberDto dto)
         {
+            var result = await _phoneNumberService.Post(dto);
+
+            if (result == null)
+            {
+                return BadRequest();
+            }
+
+            return CreatedAtAction(
+                nameof(Get),
+                new { id = result.Id },
+                result);
         }
 
-        // PUT api/<PhoneNumbersController>/5
+        // PUT api/<UsersController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<IActionResult> Put(int id, [FromBody] PhoneNumberDto dto)
         {
+            if (dto is null)
+            {
+                return BadRequest();
+            }
+
+            var isUpdate = await _phoneNumberService.Put(id, dto);
+            if (!isUpdate)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
         }
 
-        // DELETE api/<PhoneNumbersController>/5
+        // DELETE api/<UsersController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
+            var result = await _phoneNumberService.Delete(id);
+
+            if (!result)
+            {
+                BadRequest();
+            }
+            return NoContent();
         }
     }
 }

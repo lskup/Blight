@@ -10,5 +10,7 @@ namespace Blight.Models
     {
         public int Prefix { get; set; }
         public int Number { get; set; }
+        public int Notified { get; set; }
+
     }
 }

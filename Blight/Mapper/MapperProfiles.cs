@@ -20,6 +20,12 @@ namespace Blight.Mapper
 
             CreateMap<User, UserViewModelDto>();
 
+            CreateMap<PhoneNumber, PhoneNumberDto>();
+
+            CreateMap<PhoneNumberDto, PhoneNumber>();
+
+
+
         }
 
 
