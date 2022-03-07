@@ -17,6 +17,9 @@ namespace Blight.Mapper
             CreateMap<User, UserDto>();
 
             CreateMap<UserDto, User>();
+
+            CreateMap<User, UserViewModelDto>();
+
         }
 
 

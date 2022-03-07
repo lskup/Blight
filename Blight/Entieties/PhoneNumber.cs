@@ -11,7 +11,7 @@ namespace Blight.Entieties
         public int Id { get; set; }
         public int Prefix { get; set; }
         public int Number { get; set; }
-        public int Notified { get; set; }
-        public bool IsBully { get; set; }
+        public static int Notified { get; set; }
+        public bool IsBully { get; set; } = false;
     }
 }

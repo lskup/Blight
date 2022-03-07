@@ -26,7 +26,7 @@ namespace Blight.Services
         public async Task<bool> Delete(int id)
         {
             var user = await _blightDbContext.Users
-                .FirstOrDefaultAsync(x => x.Id == id);
+                .SingleOrDefaultAsync(x => x.Id == id);
                 
             if (user is null)
             {
@@ -36,6 +36,9 @@ namespace Blight.Services
             var result = _blightDbContext.Users
                 .Remove(user);
 
+            await _blightDbContext.SaveChangesAsync();
+
+
             if (result.State == EntityState.Deleted)
                 return true;
             else
@@ -43,17 +46,20 @@ namespace Blight.Services
 
         }
 
-        public async Task<User> Get(int id)
+        public async Task<UserViewModelDto> Get(int id)
         {
             var user = await _blightDbContext.Users
-                .FirstOrDefaultAsync(x => x.Id == id);
+                .Include(q => q.BlockedPhoneNumbers)
+                .SingleOrDefaultAsync(x => x.Id == id);
 
-            if(user is null)
+            var userViewModel = _mapper.Map<UserViewModelDto>(user);
+
+            if(userViewModel is null)
             {
                 return null;
             }
 
-            return user;
+            return userViewModel;
 
         }
 
