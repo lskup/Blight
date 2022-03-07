@@ -15,6 +15,8 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Blight.Interfaces;
 using Blight.Services;
+using Blight.Entieties;
+using Blight.Auxiliary;
 
 namespace Blight
 {
@@ -41,6 +43,7 @@ namespace Blight
             services.AddAutoMapper(typeof(Startup));
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IPhoneNumberService, PhoneNumberService>();
+            services.AddScoped<IAuxiliary<PhoneNumber>, PhoneAuxiliary>();
 
 
         }

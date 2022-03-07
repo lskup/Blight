@@ -104,7 +104,7 @@ namespace Blight.Services
 
             newPhoneNumber.Notified++;
 
-            var isAdded = await _auxiliary.TryAddToDb(newPhoneNumber));
+            var isAdded = await _auxiliary.TryAddToDb(newPhoneNumber);
             if(isAdded)
             {
                 return newPhoneNumber;
@@ -117,6 +117,7 @@ namespace Blight.Services
         public async Task<bool> Put(int id, PhoneNumberDto dto)
         {
             var newPhoneNumber = _mapper.Map<PhoneNumber>(dto);
+            newPhoneNumber.Id = id;
 
             var isExistingInDb = await _auxiliary.FindById(id);
 
