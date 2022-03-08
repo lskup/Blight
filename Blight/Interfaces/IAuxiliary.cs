@@ -9,9 +9,9 @@ namespace Blight.Interfaces
 {
     public interface IAuxiliary<T>
     {
-        Task<bool> UpdateIfExist(T genericObject);
+        Task<bool> NotifyIfExist(T genericObject);
         Task<bool> TryAddToDb(T genericObject);
-        Task<bool> FindById(int id);
+        Task<T> FindById(int id);
 
 
 

@@ -59,23 +59,6 @@ namespace Blight.Controllers
                 result);
         }
 
-        // PUT api/<UsersController>/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] PhoneNumberDto dto)
-        {
-            if (dto is null)
-            {
-                return BadRequest();
-            }
-
-            var isUpdate = await _phoneNumberService.Put(id, dto);
-            if (!isUpdate)
-            {
-                return NotFound();
-            }
-
-            return NoContent();
-        }
 
         // DELETE api/<UsersController>/5
         [HttpDelete("{id}")]

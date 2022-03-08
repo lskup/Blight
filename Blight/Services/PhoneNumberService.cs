@@ -87,7 +87,7 @@ namespace Blight.Services
 
             var newPhoneNumber = _mapper.Map<PhoneNumber>(dto);
 
-            var isUpdated = await _auxiliary.UpdateIfExist(newPhoneNumber);
+            var isUpdated = await _auxiliary.NotifyIfExist(newPhoneNumber);
 
             if(isUpdated)
             {
@@ -106,26 +106,5 @@ namespace Blight.Services
 
         }
 
-        public async Task<bool> Put(int id, PhoneNumberDto dto)
-        {
-            var newPhoneNumber = _mapper.Map<PhoneNumber>(dto);
-            newPhoneNumber.Id = id;
-
-            var isExistingInDb = await _auxiliary.FindById(id);
-
-            if(!isExistingInDb)
-            {
-                return false;
-            }
-
-            var isUpdated = await _auxiliary.UpdateIfExist(newPhoneNumber);
-
-            if(!isUpdated)
-            {
-                return false;
-            }
-
-            return true;
-        }
     }
 }

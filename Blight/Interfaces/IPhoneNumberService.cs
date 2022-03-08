@@ -12,7 +12,6 @@ namespace Blight.Interfaces
     {
         Task<ICollection<PhoneNumber>> GetAll(bool onlyBullyNumbers = false);
         Task<PhoneNumber> Get(int id);
-        Task<bool> Put(int id, PhoneNumberDto dto);
         Task<PhoneNumber> Post(PhoneNumberDto dto);
         Task<bool> Delete(int id);
 

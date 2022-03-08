@@ -22,9 +22,9 @@ namespace Blight.Auxiliary
             _blightDbContext = blightDbContext;
         }
 
-        public async Task<bool> UpdateIfExist(PhoneNumber phoneNumber)
+        public async Task<bool> NotifyIfExist(PhoneNumber phoneNumber)
         {
-            var existingPhoneNumber = await IsExistingInDb(phoneNumber);
+            var existingPhoneNumber = await FindElementInDb(phoneNumber);
 
             if(existingPhoneNumber is null)
             {
@@ -65,39 +65,33 @@ namespace Blight.Auxiliary
             return false;
         }
 
-        public async Task<bool> FindById(int id)
+        public async Task<PhoneNumber> FindById(int id)
         {
             var locatedNumber = await _blightDbContext.PhoneNumbers
                 .SingleOrDefaultAsync(x => x.Id == id);
 
             if (locatedNumber is null)
             {
-                return false;
+                return null;
             }
 
-            return true;
+            return locatedNumber;
 
         }
 
-        private async Task<PhoneNumber> IsExistingInDb(PhoneNumber phoneNumber)
+
+        private async Task<PhoneNumber> FindElementInDb(PhoneNumber phoneNumber)
         {
             var existingPhoneNumber = await _blightDbContext.PhoneNumbers
                 .SingleOrDefaultAsync(t => t.Prefix == phoneNumber.Prefix && t.Number == phoneNumber.Number);
-
-            if (existingPhoneNumber is null)
+            if(existingPhoneNumber is null)
             {
-                var existingById = await _blightDbContext.PhoneNumbers
-                        .SingleOrDefaultAsync(t => t.Id == phoneNumber.Id);
-                if(existingById is null)
-                {
-                    return null;
-                }
-                return existingById;
+                return null;
             }
 
             return existingPhoneNumber;
-        }
 
+        }
 
 
     }
