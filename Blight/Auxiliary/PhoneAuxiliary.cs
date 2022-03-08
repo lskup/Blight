@@ -82,11 +82,17 @@ namespace Blight.Auxiliary
         private async Task<PhoneNumber> IsExistingInDb(PhoneNumber phoneNumber)
         {
             var existingPhoneNumber = await _blightDbContext.PhoneNumbers
-                .SingleOrDefaultAsync(t => t.Prefix == phoneNumber.Prefix && t.Number == phoneNumber.Number || t.Id==phoneNumber.Id);
+                .SingleOrDefaultAsync(t => t.Prefix == phoneNumber.Prefix && t.Number == phoneNumber.Number);
 
             if (existingPhoneNumber is null)
             {
-                return null;
+                var existingById = await _blightDbContext.PhoneNumbers
+                        .SingleOrDefaultAsync(t => t.Id == phoneNumber.Id);
+                if(existingById is null)
+                {
+                    return null;
+                }
+                return existingById;
             }
 
             return existingPhoneNumber;

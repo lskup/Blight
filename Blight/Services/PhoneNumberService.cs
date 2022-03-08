@@ -54,14 +54,6 @@ namespace Blight.Services
             var phoneNumber = await _blightDbContext.PhoneNumbers
                 .SingleOrDefaultAsync(x => x.Id == id);
 
-            /*
-            var phoneNumberViewModel = _mapper.Map<PhoneNumberDto>(phoneNumber);
-
-            if (phoneNumberViewModel is null)
-            {
-                return null;
-            }
-            */
 
             return phoneNumber;
         }
