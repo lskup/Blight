@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using Blight.Entieties;
+using Blight.Exceptions;
 using Blight.Infrastructure;
 using Blight.Interfaces;
 using Blight.Models;
@@ -22,18 +23,18 @@ namespace Blight.Auxiliary
             _blightDbContext = blightDbContext;
         }
 
-        public async Task<bool> NotifyIfExist(PhoneNumber phoneNumber)
+        public async Task<bool> UpdateIfExist(PhoneNumber phoneNumber)
         {
             var existingPhoneNumber = await FindElementInDb(phoneNumber);
 
             if(existingPhoneNumber is null)
             {
                 return false;
-            }
+            }    
 
-                phoneNumber.Id = existingPhoneNumber.Id;
-                phoneNumber.Notified = existingPhoneNumber.Notified;
-                phoneNumber.Notified++;
+            phoneNumber.Id = existingPhoneNumber.Id;
+            phoneNumber.Notified = existingPhoneNumber.Notified;
+            phoneNumber.Notified++;
 
             if (phoneNumber.IsBully == false)
             {
@@ -51,18 +52,17 @@ namespace Blight.Auxiliary
 
         }
 
-        public async Task<bool> TryAddToDb(PhoneNumber phoneNumber)
+        public async Task TryAddToDb(PhoneNumber phoneNumber)
         {
             var result = _blightDbContext.PhoneNumbers
                 .Add(phoneNumber);
 
-            if(result.State == EntityState.Added)
+            if(result.State != EntityState.Added)
             {
-                await _blightDbContext.SaveChangesAsync();
-                return true;
+                throw new DataBaseException("Sorry, something went wrong");
             }
+            await _blightDbContext.SaveChangesAsync();
 
-            return false;
         }
 
         public async Task<PhoneNumber> FindById(int id)
@@ -70,29 +70,16 @@ namespace Blight.Auxiliary
             var locatedNumber = await _blightDbContext.PhoneNumbers
                 .SingleOrDefaultAsync(x => x.Id == id);
 
-            if (locatedNumber is null)
-            {
-                return null;
-            }
-
             return locatedNumber;
-
         }
-
 
         private async Task<PhoneNumber> FindElementInDb(PhoneNumber phoneNumber)
         {
             var existingPhoneNumber = await _blightDbContext.PhoneNumbers
                 .SingleOrDefaultAsync(t => t.Prefix == phoneNumber.Prefix && t.Number == phoneNumber.Number);
-            if(existingPhoneNumber is null)
-            {
-                return null;
-            }
 
             return existingPhoneNumber;
 
         }
-
-
     }
 }

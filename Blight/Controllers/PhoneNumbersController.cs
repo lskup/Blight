@@ -15,7 +15,7 @@ namespace Blight.Controllers
     [ApiController]
     public class PhoneNumbersController : ControllerBase
     {
-        IPhoneNumberService _phoneNumberService;
+        private readonly IPhoneNumberService _phoneNumberService;
 
         public PhoneNumbersController(IPhoneNumberService userService)
         {
@@ -48,17 +48,11 @@ namespace Blight.Controllers
         {
             var result = await _phoneNumberService.Post(dto);
 
-            if (result == null)
-            {
-                return BadRequest();
-            }
-
             return CreatedAtAction(
                 nameof(Get),
                 new { id = result.Id },
                 result);
         }
-
 
         // DELETE api/<UsersController>/5
         [HttpDelete("{id}")]

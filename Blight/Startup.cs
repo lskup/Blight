@@ -17,6 +17,7 @@ using Blight.Interfaces;
 using Blight.Services;
 using Blight.Entieties;
 using Blight.Auxiliary;
+using Blight.Middlewares;
 
 namespace Blight
 {
@@ -44,7 +45,7 @@ namespace Blight
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IPhoneNumberService, PhoneNumberService>();
             services.AddScoped<IAuxiliary<PhoneNumber>, PhoneAuxiliary>();
-
+            services.AddScoped<ErrorHandlingMiddleware>();
 
         }
 
@@ -58,6 +59,8 @@ namespace Blight
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Blight v1"));
             }
 
+            app.UseMiddleware<ErrorHandlingMiddleware>();
+           
             app.UseHttpsRedirection();
 
             app.UseRouting();

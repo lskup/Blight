@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Blight.Exceptions;
 
 namespace Blight.Services
 {
@@ -27,33 +28,29 @@ namespace Blight.Services
         }
 
 
-        public async Task<bool> Delete(int id)
+        public async Task Delete(int id)
         {
-            var number = await _blightDbContext.PhoneNumbers
-                .SingleOrDefaultAsync(x => x.Id == id);
 
-            if (number is null)
+            var phoneNumber = await _auxiliary.FindById(id);
+
+            if (phoneNumber is null)
             {
-                return false;
+                throw new NotFoundException("Number not Found");
             }
 
             var result = _blightDbContext.PhoneNumbers
-                .Remove(number);
+                .Remove(phoneNumber);
 
             await _blightDbContext.SaveChangesAsync();
 
 
-            if (result.State == EntityState.Deleted)
-                return true;
-            else
-                return false;
+            if (result.State != EntityState.Deleted)
+                throw new Exception();
         }
 
         public async Task<PhoneNumber> Get(int id)
         {
-            var phoneNumber = await _blightDbContext.PhoneNumbers
-                .SingleOrDefaultAsync(x => x.Id == id);
-
+            var phoneNumber = await _auxiliary.FindById(id);
 
             return phoneNumber;
         }
@@ -71,23 +68,15 @@ namespace Blight.Services
             var bullyPhoneNumbers = await _blightDbContext.PhoneNumbers
                 .Where(x => x.IsBully == true)
                 .ToListAsync();
-            
-                
 
             return bullyPhoneNumbers;
-
         }
 
         public async Task<PhoneNumber> Post(PhoneNumberDto dto)
         {
-            if(dto==null)
-            {
-                return null;
-            }
-
             var newPhoneNumber = _mapper.Map<PhoneNumber>(dto);
 
-            var isUpdated = await _auxiliary.NotifyIfExist(newPhoneNumber);
+            var isUpdated = await _auxiliary.UpdateIfExist(newPhoneNumber);
 
             if(isUpdated)
             {
@@ -96,15 +85,9 @@ namespace Blight.Services
 
             newPhoneNumber.Notified++;
 
-            var isAdded = await _auxiliary.TryAddToDb(newPhoneNumber);
-            if(isAdded)
-            {
-                return newPhoneNumber;
-
-            }
-            return null;
-
+            await _auxiliary.TryAddToDb(newPhoneNumber);
+         
+            return newPhoneNumber;
         }
-
     }
 }
