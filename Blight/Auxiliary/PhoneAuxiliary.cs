@@ -52,17 +52,18 @@ namespace Blight.Auxiliary
 
         }
 
-        public async Task TryAddToDb(PhoneNumber phoneNumber)
+        public async Task<bool> TryAddToDb(PhoneNumber phoneNumber)
         {
             var result = _blightDbContext.PhoneNumbers
                 .Add(phoneNumber);
 
             if(result.State != EntityState.Added)
             {
-                throw new DataBaseException("Sorry, something went wrong");
+                return false;
             }
             await _blightDbContext.SaveChangesAsync();
 
+            return true;
         }
 
         public async Task<PhoneNumber> FindById(int id)

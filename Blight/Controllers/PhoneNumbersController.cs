@@ -34,10 +34,6 @@ namespace Blight.Controllers
         public async Task<ActionResult<PhoneNumberDto>> Get(int id)
         {
             var result = await _phoneNumberService.Get(id);
-            if (result == null)
-            {
-                return NotFound();
-            }
 
             return Ok(result);
         }
@@ -58,12 +54,8 @@ namespace Blight.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var result = await _phoneNumberService.Delete(id);
+            await _phoneNumberService.Delete(id);
 
-            if (!result)
-            {
-                BadRequest();
-            }
             return NoContent();
         }
     }

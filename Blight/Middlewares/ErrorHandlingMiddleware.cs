@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Blight.Exceptions;
 
 namespace Blight.Middlewares
 {
@@ -24,17 +25,30 @@ namespace Blight.Middlewares
             {
                 await next.Invoke(context);
             }
-            catch(Exception e)
+            catch(NotFoundException notFoundException)
+            {
+                context.Response.StatusCode = 404;
+                context.Response.ContentType = "plain/text";
+                await context.Response.WriteAsync(notFoundException.Message);
+            }
+            catch (DataBaseException dataBaseException)
+            {
+                context.Response.StatusCode = 500;
+                context.Response.ContentType = "plain/text";
+                await context.Response.WriteAsync(dataBaseException.Message);
+            }
+            catch (Exception e)
             {
                 _logger.LogError(e, e.Message);
 
                 context.Response.StatusCode = 500;
                 context.Response.ContentType = "plain/text";
-                await context.Response.WriteAsync("Something went wrong");
-               
+                await context.Response.WriteAsync("Sorry,not handled error");
+
                 //context.Response.ContentType = "application/json";
                 //await context.Response.WriteAsync(@"{""information"": ""something went wrong""}");
             }
+
         }
     }
 }

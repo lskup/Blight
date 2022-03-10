@@ -41,16 +41,19 @@ namespace Blight.Services
             var result = _blightDbContext.PhoneNumbers
                 .Remove(phoneNumber);
 
-            await _blightDbContext.SaveChangesAsync();
-
-
             if (result.State != EntityState.Deleted)
-                throw new Exception();
+                throw new DataBaseException("Sorry, something went wrong");
+
+            await _blightDbContext.SaveChangesAsync();
         }
 
         public async Task<PhoneNumber> Get(int id)
         {
             var phoneNumber = await _auxiliary.FindById(id);
+            if(phoneNumber is null)
+            {
+                throw new NotFoundException("Number not Found");
+            }
 
             return phoneNumber;
         }
@@ -85,8 +88,12 @@ namespace Blight.Services
 
             newPhoneNumber.Notified++;
 
-            await _auxiliary.TryAddToDb(newPhoneNumber);
-         
+            var isAdded = await _auxiliary.TryAddToDb(newPhoneNumber);
+            if(!isAdded)
+            {
+                throw new DataBaseException("Sorry, something went wrong");
+            }
+
             return newPhoneNumber;
         }
     }

@@ -13,7 +13,7 @@ namespace Blight.Interfaces
         Task<ICollection<PhoneNumber>> GetAll(bool onlyBullyNumbers = false);
         Task<PhoneNumber> Get(int id);
         Task<PhoneNumber> Post(PhoneNumberDto dto);
-        Task<bool> Delete(int id);
+        Task Delete(int id);
 
     }
 }

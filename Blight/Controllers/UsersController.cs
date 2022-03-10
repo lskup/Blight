@@ -32,7 +32,6 @@ namespace Blight.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetAll()
         {
-            _logger.LogInformation("GetAll-Users method is called");
             return Ok(await _userService.GetAll());
         }
 
@@ -40,7 +39,6 @@ namespace Blight.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> Get(int id)
         {
-            _logger.LogInformation($"Get-User{id} method is called");
             var result = await _userService.Get(id);
             if(result == null)
             {
@@ -54,7 +52,6 @@ namespace Blight.Controllers
         [HttpPost]
         public async Task<ActionResult<User>> Post([FromBody] UserDto dto)
         {
-            _logger.LogInformation($"Create User method is called");
 
             var result = await _userService.Post(dto);
 
@@ -73,7 +70,6 @@ namespace Blight.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, [FromBody] UserDto dto)
         {
-            _logger.LogInformation($"Update User{id} method is called");
 
             if (dto is null)
             {
@@ -93,7 +89,6 @@ namespace Blight.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            _logger.LogInformation($"Delete User{id} method is called");
 
             var result = await _userService.Delete(id);
 
