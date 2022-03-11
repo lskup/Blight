@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace Blight.Auxiliary
@@ -24,14 +25,25 @@ namespace Blight.Auxiliary
             return entity;
         }
 
-        public Task<bool> TryAddToDb(T genericObject)
+        public async Task<bool> TryAddToDb(T genericObject)
         {
-            throw new NotImplementedException();
+            var result = await _blightDbContext.AddAsync<T>(genericObject);
+
+            if(result.State == EntityState.Added)
+            {
+                await _blightDbContext.SaveChangesAsync();
+                return true;
+            }
+
+            return false;
+
         }
 
-        public Task<bool> UpdateIfExist(T genericObject)
+        public Task<bool> UpdateIfExist(IAuxiliary<T> auxiliary)
         {
-            throw new NotImplementedException();
+            auxiliary.UpdateIfExist
+
+
         }
     }
 }

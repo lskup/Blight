@@ -11,10 +11,10 @@ namespace Blight.Models
     {
         [Required]
         [RegularExpression("[0-9]{2}",ErrorMessage ="Prefix must consist two digits")]
-        public int Prefix { get; set; }
+        public string Prefix { get; set; }
         [Required]
         [RegularExpression("[0-9]{9}", ErrorMessage = "Phone number must consist 9 digits")]
-        public int Number { get; set; }
+        public string Number { get; set; }
 
     }
 }

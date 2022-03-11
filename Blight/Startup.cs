@@ -46,6 +46,7 @@ namespace Blight
             services.AddScoped<IPhoneNumberService, PhoneNumberService>();
             services.AddScoped<IAuxiliary<PhoneNumber>, PhoneAuxiliary>();
             services.AddScoped<ErrorHandlingMiddleware>();
+            services.AddScoped<IAuxiliary<User>, GenericAuxiliary<User>>();
 
         }
 

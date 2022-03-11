@@ -9,6 +9,7 @@ using Blight.Models;
 using Blight.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
+using Blight.Auxiliary;
 
 namespace Blight.Services
 {
@@ -16,17 +17,18 @@ namespace Blight.Services
     {
         private readonly BlightDbContext _blightDbContext;
         private readonly IMapper _mapper;
+        private readonly IAuxiliary<User> _auxiliary;
 
-        public UserService(BlightDbContext blightDbContext, IMapper mapper)
+        public UserService(BlightDbContext blightDbContext, IMapper mapper, IAuxiliary<User> auxiliary)
         {
             _blightDbContext = blightDbContext;
             _mapper = mapper;
+            _auxiliary = auxiliary;
         }
 
         public async Task<bool> Delete(int id)
         {
-            var user = await _blightDbContext.Users
-                .SingleOrDefaultAsync(x => x.Id == id);
+            var user = await _auxiliary.FindById(id);
                 
             if (user is null)
             {
@@ -48,9 +50,7 @@ namespace Blight.Services
 
         public async Task<UserViewModelDto> Get(int id)
         {
-            var user = await _blightDbContext.Users
-                .Include(q => q.BlockedPhoneNumbers)
-                .SingleOrDefaultAsync(x => x.Id == id);
+            var user = await _auxiliary.FindById(id);
 
             var userViewModel = _mapper.Map<UserViewModelDto>(user);
 

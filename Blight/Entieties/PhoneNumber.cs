@@ -9,8 +9,8 @@ namespace Blight.Entieties
     public class PhoneNumber
     {
         public int Id { get; set; }
-        public int Prefix { get; set; }
-        public int Number { get; set; }
+        public string Prefix { get; set; }
+        public string Number { get; set; }
         public int Notified { get; set; }
         public bool IsBully { get; set; } = false;
 
