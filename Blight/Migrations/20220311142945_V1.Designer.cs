@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Blight.Migrations
 {
     [DbContext(typeof(BlightDbContext))]
-    [Migration("20220307120127_Update3")]
-    partial class Update3
+    [Migration("20220311142945_V1")]
+    partial class V1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -34,11 +34,11 @@ namespace Blight.Migrations
                     b.Property<int>("Notified")
                         .HasColumnType("int");
 
-                    b.Property<int>("Number")
-                        .HasColumnType("int");
+                    b.Property<string>("Number")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Prefix")
-                        .HasColumnType("int");
+                    b.Property<string>("Prefix")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("UserId")
                         .HasColumnType("int");
@@ -83,13 +83,13 @@ namespace Blight.Migrations
             modelBuilder.Entity("Blight.Entieties.PhoneNumber", b =>
                 {
                     b.HasOne("Blight.Entieties.User", null)
-                        .WithMany("BlockedPhoneNumbers")
+                        .WithMany("BlockedNumbers")
                         .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("Blight.Entieties.User", b =>
                 {
-                    b.Navigation("BlockedPhoneNumbers");
+                    b.Navigation("BlockedNumbers");
                 });
 #pragma warning restore 612, 618
         }

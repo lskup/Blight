@@ -63,7 +63,7 @@ namespace Blight.Services
 
         }
 
-        public async Task<ICollection<User>> GetAll()
+        public async Task<IEnumerable<User>> GetAll()
         {
             var users = await _blightDbContext.Users
                 .ToListAsync();

@@ -10,7 +10,7 @@ namespace Blight.Interfaces
 {
     public interface IUserService
     {
-        Task<ICollection<User>> GetAll();
+        Task<IEnumerable<User>> GetAll();
         Task<UserViewModelDto> Get(int id);
         Task<bool> Put(int id,UserDto dto);
         Task<User> Post(UserDto dto);

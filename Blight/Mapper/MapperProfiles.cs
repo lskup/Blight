@@ -16,7 +16,8 @@ namespace Blight.Mapper
         {
             CreateMap<User, UserDto>();
 
-            CreateMap<UserDto, User>();
+            CreateMap<UserDto, User>()
+                .ForMember(c => c.BlockedNumbers, x => x.MapFrom(s => new List<PhoneNumber>()));
 
             CreateMap<User, UserViewModelDto>();
 

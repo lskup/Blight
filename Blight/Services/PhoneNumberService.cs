@@ -58,7 +58,7 @@ namespace Blight.Services
             return phoneNumber;
         }
 
-        public async Task<ICollection<PhoneNumber>> GetAll(bool onlyBullyNumbers)
+        public async Task<IEnumerable<PhoneNumber>> GetAll(bool onlyBullyNumbers)
         {
             if(!onlyBullyNumbers)
             {

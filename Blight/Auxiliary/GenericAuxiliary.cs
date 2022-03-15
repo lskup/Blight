@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-
+using Blight.Entieties;
 
 namespace Blight.Auxiliary
 {
@@ -39,11 +39,30 @@ namespace Blight.Auxiliary
 
         }
 
-        public Task<bool> UpdateIfExist(IAuxiliary<T> auxiliary)
+        public Task<bool> UpdateIfExist(T genericObject)
         {
-            auxiliary.UpdateIfExist
 
 
         }
+
+        private async Task<T> FindElementInDb(T genericObject)
+        {
+            var genericEntity = _blightDbContext.Set<T>()
+                .AsNoTracking()
+
+            genericEntity.
+            
+                
+
+
+
+            return existingPhoneNumber;
+
+
+
+        }
+
+
     }
+ 
 }
