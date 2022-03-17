@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using Blight.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Blight.Exceptions;
+using AutoMapper;
 
 namespace Blight.Repository
 {
@@ -15,51 +17,85 @@ namespace Blight.Repository
     {
         protected readonly BlightDbContext _blightDbContext;
         internal DbSet<T> _dbSet;
-        protected readonly ILogger _logger;
+        private readonly IMapper _mapper;
 
-        public GenericRepository(BlightDbContext blightDbContext, DbSet<T> dbSet, ILogger logger)
+        public GenericRepository(BlightDbContext blightDbContext, IMapper mapper)
         {
             _blightDbContext = blightDbContext;
-            _dbSet = blightDbContext.Set<T>();
-            _logger = logger;
+            _dbSet = _blightDbContext.Set<T>();
+            _mapper = mapper;
         }
 
-        public virtual async Task<bool> Add(T entity)
+        public virtual async Task<T> Create(IDto dto)
         {
-            await _dbSet.AddAsync(entity);
-            return true;
+            var newMappedObject = _mapper.Map<T>(dto);
+
+            var isUpdated = await Update(newMappedObject);
+
+            if (isUpdated)
+            {
+                return newMappedObject;
+            }
+
+            var result = await _dbSet.AddAsync(newMappedObject);
+
+            if (result.State != EntityState.Added)
+            {
+                throw new DataBaseException("Something went wrong");
+            }
+
+            await _blightDbContext.SaveChangesAsync();
+
+            return newMappedObject;
         }
 
-        public virtual Task<bool> Delete(int id)
+        public virtual async Task Delete(int id)
         {
-            throw new NotImplementedException();
+            var entity = await GetById(id);
+
+            var result = _dbSet.Remove(entity);
+
+            if (result.State != EntityState.Deleted)
+            {
+                throw new DataBaseException("Something went wrong");
+            }
+            await _blightDbContext.SaveChangesAsync();
+
         }
 
-        public virtual async Task<IEnumerable<T>> Find(Func<T, bool> predicate)
+        public virtual async Task<T> FindElement(Expression<Func<T, bool>> predicate)
         {
-            var result = await _dbSet.Where(predicate)
-                .AsQueryable()
-                .ToListAsync();
+            var result = await _dbSet.SingleOrDefaultAsync(predicate);
 
             return result;
         }
                 
         
-        public virtual async Task<IEnumerable<T>> GetAll(Func<T,bool> predicate = null)
+        public virtual async Task<IEnumerable<T>> GetAll(Expression<Func<T,bool>> predicate)
         {
-            var result = await _dbSet.Where(predicate)
-                .AsQueryable()
+            if(predicate is null)
+            {
+                return await _dbSet
+                    .AsNoTracking()
+                    .ToListAsync();
+            }
+
+            return await _dbSet
+                .Where(predicate)
                 .AsNoTracking()
                 .ToListAsync();
-
-            return result;
-
-
+                
         }
 
         public virtual async Task<T> GetById(int id)
         {
-            return await _dbSet.FindAsync(id);
+            var result = await _dbSet.FindAsync(id);
+            if(result is null)
+            {
+                throw new NotFoundException("Element not Found");
+            }
+
+            return result;
         }
 
         public virtual Task<bool> Update(T entity)

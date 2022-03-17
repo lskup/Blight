@@ -15,25 +15,29 @@ namespace Blight.Controllers
     [ApiController]
     public class PhoneNumbersController : ControllerBase
     {
-        private readonly IPhoneNumberService _phoneNumberService;
+        private readonly IGenericRepository<PhoneNumber> _phoneNumberRepos;
 
-        public PhoneNumbersController(IPhoneNumberService userService)
+        public PhoneNumbersController(IGenericRepository<PhoneNumber> phoneNumberRepos)
         {
-            _phoneNumberService = userService;
+            _phoneNumberRepos = phoneNumberRepos;
         }
 
         // GET: api/<UsersController>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PhoneNumber>>> GetAll(bool onlyBullyNumbers)
         {
-            return Ok(await _phoneNumberService.GetAll(onlyBullyNumbers));
+            if (onlyBullyNumbers)
+            {
+                return Ok(await _phoneNumberRepos.GetAll(c => c.IsBully == true));
+            }
+            return Ok(await _phoneNumberRepos.GetAll());
         }
 
         // GET api/<UsersController>/5
         [HttpGet("{id}")]
         public async Task<ActionResult<PhoneNumberDto>> Get(int id)
         {
-            var result = await _phoneNumberService.Get(id);
+            var result = await _phoneNumberRepos.GetById(id);
 
             return Ok(result);
         }
@@ -42,7 +46,7 @@ namespace Blight.Controllers
         [HttpPost]
         public async Task<ActionResult<PhoneNumber>> Post([FromBody] PhoneNumberDto dto)
         {
-            var result = await _phoneNumberService.Post(dto);
+            var result = await _phoneNumberRepos.Create(dto);
 
             return CreatedAtAction(
                 nameof(Get),
@@ -54,7 +58,7 @@ namespace Blight.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await _phoneNumberService.Delete(id);
+            await _phoneNumberRepos.Delete(id);
 
             return NoContent();
         }

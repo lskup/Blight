@@ -18,6 +18,7 @@ using Blight.Services;
 using Blight.Entieties;
 using Blight.Auxiliary;
 using Blight.Middlewares;
+using Blight.Repository;
 
 namespace Blight
 {
@@ -47,7 +48,8 @@ namespace Blight
             services.AddScoped<IAuxiliary<PhoneNumber>, PhoneAuxiliary>();
             services.AddScoped<ErrorHandlingMiddleware>();
             services.AddScoped<IAuxiliary<User>, GenericAuxiliary<User>>();
-
+            services.AddScoped<IGenericRepository<PhoneNumber>, PhoneRepository>();
+            services.AddScoped<IGenericRepository<User>, UserRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

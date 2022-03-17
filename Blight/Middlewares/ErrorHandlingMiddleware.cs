@@ -27,12 +27,16 @@ namespace Blight.Middlewares
             }
             catch(NotFoundException notFoundException)
             {
+                _logger.LogError(notFoundException, notFoundException.Message);
+
                 context.Response.StatusCode = 404;
                 context.Response.ContentType = "plain/text";
                 await context.Response.WriteAsync(notFoundException.Message);
             }
             catch (DataBaseException dataBaseException)
             {
+                _logger.LogError(dataBaseException, dataBaseException.Message);
+
                 context.Response.StatusCode = 500;
                 context.Response.ContentType = "plain/text";
                 await context.Response.WriteAsync(dataBaseException.Message);

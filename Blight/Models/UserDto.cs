@@ -4,10 +4,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Blight.Interfaces;
 
 namespace Blight.Models
 {
-    public class UserDto
+    public class UserDto:IDto
     {
         [Required]
         public string FirstName { get; set; }

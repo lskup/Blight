@@ -41,28 +41,8 @@ namespace Blight.Auxiliary
 
         public Task<bool> UpdateIfExist(T genericObject)
         {
-
-
+            throw new NotImplementedException();
         }
-
-        private async Task<T> FindElementInDb(T genericObject)
-        {
-            var genericEntity = _blightDbContext.Set<T>()
-                .AsNoTracking()
-
-            genericEntity.
-            
-                
-
-
-
-            return existingPhoneNumber;
-
-
-
-        }
-
-
     }
  
 }
