@@ -28,7 +28,12 @@ namespace Blight.Repository
         {
             var newMappedObject = await CreateOrUpdate(null,dto);
 
-            var result = await _dbSet.AddAsync(newMappedObject);
+            if(newMappedObject.Item2 == true)
+            {
+                return newMappedObject.Item1;
+            }
+
+            var result = await _dbSet.AddAsync(newMappedObject.Item1);
 
             if (result.State != EntityState.Added)
             {
@@ -37,7 +42,7 @@ namespace Blight.Repository
 
             await _blightDbContext.SaveChangesAsync();
 
-            return newMappedObject;
+            return newMappedObject.Item1;
         }
 
         public virtual async Task Delete(int id)
@@ -89,7 +94,7 @@ namespace Blight.Repository
             return result;
         }
 
-        public virtual Task<T> CreateOrUpdate(int? id,IDto dto)
+        public virtual Task<Tuple<T,bool>> CreateOrUpdate(int? id,IDto dto)
         {
             throw new NotImplementedException();
         }
