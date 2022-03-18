@@ -15,42 +15,37 @@ namespace Blight.Repository
 {
     public class UserRepository : GenericRepository<User>
     {
-        public UserRepository(BlightDbContext blightDbContext, IMapper mapper) : base(blightDbContext, mapper)
+        private readonly IMapper _mapper;
+
+        public UserRepository(BlightDbContext blightDbContext, IMapper mapper) : base(blightDbContext)
         {
+            _mapper = mapper;
         }
 
-        public override async Task<bool> Update(User user)
+        public override async Task<User> CreateOrUpdate(int? id,IDto dto)
         {
+            var user = _mapper.Map<User>(dto);
+
             var existingUser = await FindElement
-                (e => e.Number == phoneNumber.Number &&
-                 e.Prefix == phoneNumber.Prefix);
+                (e => e.Id == id.Value);
 
-            if (existingPhoneNumber is null)
+            if (existingUser is null)
             {
-                return false;
+                throw new NotFoundException("User not Found");
             }
 
-            phoneNumber.Id = existingPhoneNumber.Id;
-            phoneNumber.Notified = existingPhoneNumber.Notified;
-            phoneNumber.Notified++;
+            user.Id = existingUser.Id;
 
-            if (phoneNumber.IsBully == false)
-            {
-                if (phoneNumber.Notified > 20)
-                    phoneNumber.IsBully = true;
-            }
-
-            _blightDbContext.Entry(existingPhoneNumber)
+            _blightDbContext.Entry(existingUser)
                 .CurrentValues
-                .SetValues(phoneNumber);
+                .SetValues(user);
 
             await _blightDbContext.SaveChangesAsync();
 
-            return true;
+            return user;
         }
     }
 
 
 
-}
 }

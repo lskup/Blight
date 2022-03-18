@@ -20,30 +20,26 @@ namespace Blight.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
-        private readonly ILogger<UsersController> _logger;
+        private readonly IGenericRepository<User> _userRepos;
 
-        public UsersController(IUserService userService, ILogger<UsersController> logger)
+        public UsersController(IUserService userService, IGenericRepository<User> userRepos)
         {
             _userService = userService;
-            _logger = logger;
+            _userRepos = userRepos;
         }
 
         // GET: api/<UsersController>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetAll()
         {
-            return Ok(await _userService.GetAll());
+            return Ok(await _userRepos.GetAll());
         }
 
         // GET api/<UsersController>/5
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> Get(int id)
         {
-            var result = await _userService.Get(id);
-            if(result == null)
-            {
-                return NotFound();
-            }
+            var result = await _userRepos.GetById(id);
 
             return Ok(result);
         }
@@ -52,13 +48,7 @@ namespace Blight.Controllers
         [HttpPost]
         public async Task<ActionResult<User>> Post([FromBody] UserDto dto)
         {
-
-            var result = await _userService.Post(dto);
-
-            if (result == null)
-            {
-                return BadRequest();
-            }
+            var result = await _userRepos.Create(dto);
 
             return CreatedAtAction(
                 nameof(Get),
@@ -70,6 +60,7 @@ namespace Blight.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, [FromBody] UserDto dto)
         {
+            await _userRepos.CreateOrUpdate(id, dto);
 
             if (dto is null)
             {

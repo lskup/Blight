@@ -13,7 +13,7 @@ namespace Blight.Interfaces
         Task<T> GetById(int id);
         Task<T> Create(IDto entity);
         Task Delete(int id);
-        Task<bool> Update(T entity);
+        Task<T> CreateOrUpdate(int? id,IDto dto);
         Task<T> FindElement(Expression<Func<T, bool>> predicate);
 
 

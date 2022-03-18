@@ -43,11 +43,7 @@ namespace Blight
             services.AddDbContext<BlightDbContext>(cfg =>
             cfg.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddAutoMapper(typeof(Startup));
-            services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IPhoneNumberService, PhoneNumberService>();
-            services.AddScoped<IAuxiliary<PhoneNumber>, PhoneAuxiliary>();
             services.AddScoped<ErrorHandlingMiddleware>();
-            services.AddScoped<IAuxiliary<User>, GenericAuxiliary<User>>();
             services.AddScoped<IGenericRepository<PhoneNumber>, PhoneRepository>();
             services.AddScoped<IGenericRepository<User>, UserRepository>();
         }

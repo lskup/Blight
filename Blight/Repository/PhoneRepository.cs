@@ -15,20 +15,23 @@ namespace Blight.Repository
 {
     public class PhoneRepository : GenericRepository<PhoneNumber>
     {
+        private readonly IMapper _mapper;
 
-        public PhoneRepository(BlightDbContext blightDbContext,IMapper mapper) : base(blightDbContext,mapper)
+        public PhoneRepository(BlightDbContext blightDbContext,IMapper mapper) : base(blightDbContext)
         {
-
+            _mapper = mapper;
         }
-        public override async Task<bool> Update(PhoneNumber phoneNumber)
+        public override async Task<Tuple<PhoneNumber,bool>> CreateOrUpdate(int? id,IDto dto)
         {
+            var phoneNumber = _mapper.Map<PhoneNumber>(dto);
+
             var existingPhoneNumber = await FindElement
                 (e=>e.Number == phoneNumber.Number &&
                  e.Prefix==phoneNumber.Prefix);
 
             if (existingPhoneNumber is null)
             {
-                return false;
+                return new Tuple<PhoneNumber, bool>(phoneNumber, false);
             }
 
             phoneNumber.Id = existingPhoneNumber.Id;
@@ -47,7 +50,7 @@ namespace Blight.Repository
 
             await _blightDbContext.SaveChangesAsync();
 
-            return true;
+            return new Tuple<PhoneNumber, bool>(phoneNumber, true);
         }
     }
 }

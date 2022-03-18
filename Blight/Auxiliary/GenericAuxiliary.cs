@@ -10,7 +10,7 @@ using Blight.Entieties;
 
 namespace Blight.Auxiliary
 {
-    public class GenericAuxiliary<T> : IAuxiliary<T> where T:class
+    public class GenericAuxiliary<T> : IAuxiliary<T> where T : class
     {
         private readonly BlightDbContext _blightDbContext;
         public GenericAuxiliary(BlightDbContext blightDbContext)
@@ -29,7 +29,7 @@ namespace Blight.Auxiliary
         {
             var result = await _blightDbContext.AddAsync<T>(genericObject);
 
-            if(result.State == EntityState.Added)
+            if (result.State == EntityState.Added)
             {
                 await _blightDbContext.SaveChangesAsync();
                 return true;
@@ -44,5 +44,5 @@ namespace Blight.Auxiliary
             throw new NotImplementedException();
         }
     }
- 
+
 }

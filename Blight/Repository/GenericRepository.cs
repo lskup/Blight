@@ -17,25 +17,16 @@ namespace Blight.Repository
     {
         protected readonly BlightDbContext _blightDbContext;
         internal DbSet<T> _dbSet;
-        private readonly IMapper _mapper;
 
-        public GenericRepository(BlightDbContext blightDbContext, IMapper mapper)
+        public GenericRepository(BlightDbContext blightDbContext)
         {
             _blightDbContext = blightDbContext;
             _dbSet = _blightDbContext.Set<T>();
-            _mapper = mapper;
         }
 
         public virtual async Task<T> Create(IDto dto)
         {
-            var newMappedObject = _mapper.Map<T>(dto);
-
-            var isUpdated = await Update(newMappedObject);
-
-            if (isUpdated)
-            {
-                return newMappedObject;
-            }
+            var newMappedObject = await CreateOrUpdate(null,dto);
 
             var result = await _dbSet.AddAsync(newMappedObject);
 
@@ -98,7 +89,7 @@ namespace Blight.Repository
             return result;
         }
 
-        public virtual Task<bool> Update(T entity)
+        public virtual Task<T> CreateOrUpdate(int? id,IDto dto)
         {
             throw new NotImplementedException();
         }
