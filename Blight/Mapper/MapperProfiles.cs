@@ -20,7 +20,7 @@ namespace Blight.Mapper
                 .ForMember(c => c.BlockedNumbers, x => x.MapFrom(s => new List<PhoneNumber>()));
 
             CreateMap<User, UserViewModelDto>();
-
+                
             CreateMap<PhoneNumber, PhoneNumberDto>();
 
             CreateMap<PhoneNumberDto, PhoneNumber>();

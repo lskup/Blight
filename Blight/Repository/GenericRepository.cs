@@ -65,7 +65,6 @@ namespace Blight.Repository
 
             return result;
         }
-                
         
         public virtual async Task<IEnumerable<T>> GetAll(Expression<Func<T,bool>> predicate)
         {
@@ -98,5 +97,6 @@ namespace Blight.Repository
         {
             throw new NotImplementedException();
         }
+
     }
 }

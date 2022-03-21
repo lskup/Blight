@@ -19,12 +19,10 @@ namespace Blight.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly IUserService _userService;
         private readonly IGenericRepository<User> _userRepos;
 
-        public UsersController(IUserService userService, IGenericRepository<User> userRepos)
+        public UsersController(IGenericRepository<User> userRepos)
         {
-            _userService = userService;
             _userRepos = userRepos;
         }
 
@@ -58,7 +56,7 @@ namespace Blight.Controllers
 
         // PUT api/<UsersController>/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] UserDto dto)
+        public async Task<IActionResult> Put(int id, [FromBody] UserUpdateDto dto)
         {
             await _userRepos.CreateOrUpdate(id, dto);
 
@@ -67,11 +65,7 @@ namespace Blight.Controllers
                 return BadRequest();
             }
 
-            var isUpdate = await _userService.Put(id, dto);
-            if(!isUpdate)
-            {
-                return NotFound();
-            }
+            await _userRepos.CreateOrUpdate(id, dto);
 
             return NoContent();
         }
@@ -81,12 +75,8 @@ namespace Blight.Controllers
         public async Task<IActionResult> Delete(int id)
         {
 
-            var result = await _userService.Delete(id);
+            await _userRepos.Delete(id);
 
-            if(!result)
-            {
-                BadRequest();
-            }
             return NoContent();
         }
     }
