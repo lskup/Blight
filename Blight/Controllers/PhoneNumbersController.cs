@@ -15,11 +15,11 @@ namespace Blight.Controllers
     [ApiController]
     public class PhoneNumbersController : ControllerBase
     {
-        private readonly IGenericRepository<PhoneNumber> _phoneNumberRepos;
+        private readonly IGenericRepository2<PhoneNumber> _phoneNumberRepos2;
 
-        public PhoneNumbersController(IGenericRepository<PhoneNumber> phoneNumberRepos)
+        public PhoneNumbersController(IGenericRepository2<PhoneNumber> phoneNumberRepos2)
         {
-            _phoneNumberRepos = phoneNumberRepos;
+            _phoneNumberRepos2 = phoneNumberRepos2;
         }
 
         // GET: api/<UsersController>
@@ -28,16 +28,16 @@ namespace Blight.Controllers
         {
             if (onlyBullyNumbers)
             {
-                return Ok(await _phoneNumberRepos.GetAll(c => c.IsBully == true));
+                return Ok(await _phoneNumberRepos2.GetAll(c => c.IsBully == true));
             }
-            return Ok(await _phoneNumberRepos.GetAll());
+            return Ok(await _phoneNumberRepos2.GetAll());
         }
 
         // GET api/<UsersController>/5
         [HttpGet("{id}")]
         public async Task<ActionResult<PhoneNumberDto>> Get(int id)
         {
-            var result = await _phoneNumberRepos.GetById(id);
+            var result = await _phoneNumberRepos2.GetById(id);
 
             return Ok(result);
         }
@@ -46,7 +46,7 @@ namespace Blight.Controllers
         [HttpPost]
         public async Task<ActionResult<PhoneNumber>> Post([FromBody] PhoneNumberDto dto)
         {
-            var result = await _phoneNumberRepos.Create(dto);
+            var result = await _phoneNumberRepos2.Create(dto);
 
             return CreatedAtAction(
                 nameof(Get),
@@ -58,7 +58,7 @@ namespace Blight.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await _phoneNumberRepos.Delete(id);
+            await _phoneNumberRepos2.Delete(id);
 
             return NoContent();
         }

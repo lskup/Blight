@@ -46,6 +46,10 @@ namespace Blight
             services.AddScoped<ErrorHandlingMiddleware>();
             services.AddScoped<IGenericRepository<PhoneNumber>, PhoneRepository>();
             services.AddScoped<IGenericRepository<User>, UserRepository>();
+            services.AddScoped<IGenericRepository2<User>, UserRepos2>();
+            services.AddScoped<IGenericRepository2<User>, UserRepos2>();
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

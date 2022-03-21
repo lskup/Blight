@@ -13,33 +13,46 @@ using AutoMapper;
 
 namespace Blight.Repository
 {
-    public class UserRepository : GenericRepository<User>
+    public class UserRepos2 : GenericRepository2<User>
     {
         private readonly IMapper _mapper;
 
-        public UserRepository(BlightDbContext blightDbContext, IMapper mapper) : base(blightDbContext)
+        public UserRepos2(BlightDbContext blightDbContext, IMapper mapper) : base(blightDbContext,mapper)
         {
             _mapper = mapper;
         }
 
-        public override async Task<Tuple<User,bool>> CreateOrUpdate(int? id,IDto dto)
+        public override async Task<User> Update(int id,IDto dto)
         {
             var user = _mapper.Map<User>(dto);
-                
-            if (id is null)
-            {
-                return new Tuple<User, bool>(user, false);
-            }
 
             var existingUser = await FindElement
-                (e => e.Id == id.Value);
+                (e => e.Id == id);
 
-            if(existingUser ==null)
+            if (existingUser == null)
             {
                 throw new NotFoundException("User not Found");
             }
 
             user.Id = existingUser.Id;
+
+            var mappedObjProperties = user.GetType()
+                .GetProperties();
+
+            var existingObjProperties = existingUser.GetType()
+                .GetProperties();
+
+
+            for (int j = 0; j < mappedObjProperties.Length; j++)
+            {
+                for (int i = 0; i < existingObjProperties.Length; i++)
+                {
+                    if(mappedObjProperties[j].Name == existingObjProperties[i].Name)
+                    {
+                        existingObjProperties.SetValue(mappedObjProperties[j], i);
+                    }
+                }
+            }
 
             _blightDbContext.Entry(existingUser)
                 .CurrentValues
@@ -47,7 +60,7 @@ namespace Blight.Repository
 
             await _blightDbContext.SaveChangesAsync();
 
-            return new Tuple<User,bool>(user,true);
+            return existingUser;
         }
         //////////////////////////////////////////////////////////////////////////
 

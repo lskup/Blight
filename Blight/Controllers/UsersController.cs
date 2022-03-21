@@ -19,25 +19,25 @@ namespace Blight.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly IGenericRepository<User> _userRepos;
+        private readonly IGenericRepository2<User> _userRepos2;
 
-        public UsersController(IGenericRepository<User> userRepos)
+        public UsersController(IGenericRepository2<User> userRepos2)
         {
-            _userRepos = userRepos;
+            _userRepos2 = userRepos2;
         }
 
         // GET: api/<UsersController>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetAll()
         {
-            return Ok(await _userRepos.GetAll());
+            return Ok(await _userRepos2.GetAll());
         }
 
         // GET api/<UsersController>/5
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> Get(int id)
         {
-            var result = await _userRepos.GetById(id);
+            var result = await _userRepos2.GetById(id);
 
             return Ok(result);
         }
@@ -46,7 +46,7 @@ namespace Blight.Controllers
         [HttpPost]
         public async Task<ActionResult<User>> Post([FromBody] UserDto dto)
         {
-            var result = await _userRepos.Create(dto);
+            var result = await _userRepos2.Create(dto);
 
             return CreatedAtAction(
                 nameof(Get),
@@ -58,14 +58,13 @@ namespace Blight.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, [FromBody] UserUpdateDto dto)
         {
-            await _userRepos.CreateOrUpdate(id, dto);
 
             if (dto is null)
             {
                 return BadRequest();
             }
 
-            await _userRepos.CreateOrUpdate(id, dto);
+            await _userRepos2.Update(id, dto);
 
             return NoContent();
         }
@@ -75,7 +74,7 @@ namespace Blight.Controllers
         public async Task<IActionResult> Delete(int id)
         {
 
-            await _userRepos.Delete(id);
+            await _userRepos2.Delete(id);
 
             return NoContent();
         }
