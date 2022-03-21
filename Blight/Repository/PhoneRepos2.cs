@@ -31,7 +31,7 @@ namespace Blight.Repository
 
             if (existingPhoneNumber is null)
             {
-                return phoneNumber;
+                return await base.Create(dto);
             }
 
             return await Update(phoneNumber,existingPhoneNumber);

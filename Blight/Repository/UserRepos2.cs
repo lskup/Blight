@@ -34,29 +34,29 @@ namespace Blight.Repository
                 throw new NotFoundException("User not Found");
             }
 
-            user.Id = existingUser.Id;
+            //existingUser.FirstName = user.FirstName;
+            //existingUser.LastName = user.LastName;
+            //existingUser.DateOfBirth = user.DateOfBirth;
+            //existingUser.Nationality = user.Nationality;
 
-            var mappedObjProperties = user.GetType()
+            var dtoProperties = user.GetType()
                 .GetProperties();
 
-            var existingObjProperties = existingUser.GetType()
+            var existingUserProperties = existingUser.GetType()
                 .GetProperties();
 
-
-            for (int j = 0; j < mappedObjProperties.Length; j++)
+            for (int i = 0; i < existingUserProperties.Length; i++)
             {
-                for (int i = 0; i < existingObjProperties.Length; i++)
+                if (dtoProperties[i].GetValue(user) != null)
                 {
-                    if(mappedObjProperties[j].Name == existingObjProperties[i].Name)
-                    {
-                        existingObjProperties.SetValue(mappedObjProperties[j], i);
-                    }
+                    existingUserProperties.SetValue(dtoProperties[i].GetValue(user), i);
                 }
             }
 
+
             _blightDbContext.Entry(existingUser)
                 .CurrentValues
-                .SetValues(user);
+                .SetValues(existingUser);
 
             await _blightDbContext.SaveChangesAsync();
 

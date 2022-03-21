@@ -44,10 +44,8 @@ namespace Blight
             cfg.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddAutoMapper(typeof(Startup));
             services.AddScoped<ErrorHandlingMiddleware>();
-            services.AddScoped<IGenericRepository<PhoneNumber>, PhoneRepository>();
-            services.AddScoped<IGenericRepository<User>, UserRepository>();
             services.AddScoped<IGenericRepository2<User>, UserRepos2>();
-            services.AddScoped<IGenericRepository2<User>, UserRepos2>();
+            services.AddScoped<IGenericRepository2<PhoneNumber>, PhoneRepos2>();
 
 
         }
