@@ -14,11 +14,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Blight.Interfaces;
-using Blight.Services;
 using Blight.Entieties;
-using Blight.Auxiliary;
 using Blight.Middlewares;
 using Blight.Repository;
+using FluentValidation;
+using Blight.Models;
+using Blight.Models.Validators;
+using FluentValidation.AspNetCore;
 
 namespace Blight
 {
@@ -34,8 +36,9 @@ namespace Blight
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddControllers()
+                    .AddFluentValidation();
 
-            services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Blight", Version = "v1" });
@@ -44,9 +47,9 @@ namespace Blight
             cfg.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddAutoMapper(typeof(Startup));
             services.AddScoped<ErrorHandlingMiddleware>();
+            services.AddScoped<IValidator<RegisterUserDto>, RegisterUserDtoValidator>();
             services.AddScoped<IGenericRepository2<User>, UserRepos2>();
             services.AddScoped<IGenericRepository2<PhoneNumber>, PhoneRepos2>();
-
 
         }
 

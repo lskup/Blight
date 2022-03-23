@@ -4,14 +4,16 @@ using Blight.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Blight.Migrations
 {
     [DbContext(typeof(BlightDbContext))]
-    partial class BlightDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220323093149_UserRole_Seed")]
+    partial class UserRole_Seed
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

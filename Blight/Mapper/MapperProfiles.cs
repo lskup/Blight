@@ -14,14 +14,13 @@ namespace Blight.Mapper
     {
         public MapperProfiles()
         {
-            CreateMap<User, UserDto>();
-
-            CreateMap<UserDto, User>()
-                .ForMember(c => c.BlockedNumbers, x => x.MapFrom(s => new List<PhoneNumber>()));
+            CreateMap<RegisterUserDto, User>()
+                .ForMember(c => c.BlockedNumbers, x => x.MapFrom(s => new List<PhoneNumber>()))
+                .ForMember(d => d.Email, x => x.MapFrom(j => j.Email.ToLower()));
 
             CreateMap<User, UserViewModelDto>();
             
-            CreateMap<UserUpdateDto, User>();
+            CreateMap<UpdateUserDto, User>();
 
             CreateMap<PhoneNumber, PhoneNumberDto>();
 

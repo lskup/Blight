@@ -43,8 +43,8 @@ namespace Blight.Controllers
         }
 
         // POST api/<UsersController>
-        [HttpPost]
-        public async Task<ActionResult<User>> Post([FromBody] UserDto dto)
+        [HttpPost("register")]
+        public async Task<ActionResult<User>> Post([FromBody] RegisterUserDto dto)
         {
             var result = await _userRepos2.Create(dto);
 
@@ -56,14 +56,8 @@ namespace Blight.Controllers
 
         // PUT api/<UsersController>/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] UserUpdateDto dto)
+        public async Task<IActionResult> Put(int id, [FromBody] UpdateUserDto dto)
         {
-
-            if (dto is null)
-            {
-                return BadRequest();
-            }
-
             await _userRepos2.Update(id, dto);
 
             return NoContent();
@@ -73,7 +67,6 @@ namespace Blight.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-
             await _userRepos2.Delete(id);
 
             return NoContent();

@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Blight.Exceptions;
 using Blight.Interfaces;
 using AutoMapper;
+using Blight.Models;
 
 namespace Blight.Repository
 {
@@ -24,7 +25,9 @@ namespace Blight.Repository
 
         public override async Task<User> Update(int id,IDto dto)
         {
-            var user = _mapper.Map<User>(dto);
+            //var user = _mapper.Map<User>(dto);
+
+            var user = dto;
 
             var existingUser = await FindElement
                 (e => e.Id == id);
@@ -34,11 +37,6 @@ namespace Blight.Repository
                 throw new NotFoundException("User not Found");
             }
 
-            //existingUser.FirstName = user.FirstName;
-            //existingUser.LastName = user.LastName;
-            //existingUser.DateOfBirth = user.DateOfBirth;
-            //existingUser.Nationality = user.Nationality;
-
             var dtoProperties = user.GetType()
                 .GetProperties();
 
@@ -47,12 +45,20 @@ namespace Blight.Repository
 
             for (int i = 0; i < existingUserProperties.Length; i++)
             {
-                if (dtoProperties[i].GetValue(user) != null)
+                for (int j = 0; j < dtoProperties.Length; j++)
                 {
-                    existingUserProperties.SetValue(dtoProperties[i].GetValue(user), i);
+                    if(existingUserProperties[i].Name == dtoProperties[j].Name)
+                    {
+                        var propertyValue = dtoProperties[j].GetValue(user);
+
+                        if(propertyValue != null)
+                        {
+                            existingUserProperties[i].SetValue(existingUser, propertyValue);
+                        }
+
+                    }
                 }
             }
-
 
             _blightDbContext.Entry(existingUser)
                 .CurrentValues
@@ -62,7 +68,6 @@ namespace Blight.Repository
 
             return existingUser;
         }
-        //////////////////////////////////////////////////////////////////////////
 
 
 

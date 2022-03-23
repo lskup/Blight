@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Blight.Migrations
 {
     [DbContext(typeof(BlightDbContext))]
-    [Migration("20220311142945_V1")]
-    partial class V1
+    [Migration("20220323075337_UserRole")]
+    partial class UserRole
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -35,9 +35,11 @@ namespace Blight.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Number")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Prefix")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("UserId")
@@ -48,6 +50,22 @@ namespace Blight.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("PhoneNumbers");
+                });
+
+            modelBuilder.Entity("Blight.Entieties.Role", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("Blight.Entieties.User", b =>
@@ -61,6 +79,7 @@ namespace Blight.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FirstName")
@@ -75,7 +94,12 @@ namespace Blight.Migrations
                     b.Property<string>("Nationality")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
 
                     b.ToTable("Users");
                 });
@@ -85,6 +109,17 @@ namespace Blight.Migrations
                     b.HasOne("Blight.Entieties.User", null)
                         .WithMany("BlockedNumbers")
                         .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("Blight.Entieties.User", b =>
+                {
+                    b.HasOne("Blight.Entieties.Role", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("Blight.Entieties.User", b =>
