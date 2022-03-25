@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Blight.Exceptions;
 using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 
 namespace Blight.Repository
 {
@@ -53,7 +54,6 @@ namespace Blight.Repository
                 throw new DataBaseException("Something went wrong");
             }
             await _blightDbContext.SaveChangesAsync();
-
         }
 
         public virtual async Task<T> FindElement(Expression<Func<T, bool>> predicate)
@@ -76,7 +76,6 @@ namespace Blight.Repository
                 .Where(predicate)
                 .AsNoTracking()
                 .ToListAsync();
-
         }
 
         public virtual async Task<T> GetById(int id)
@@ -86,7 +85,7 @@ namespace Blight.Repository
             {
                 throw new NotFoundException("Element not Found");
             }
-
+            
             return result;
         }
 

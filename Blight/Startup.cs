@@ -21,6 +21,9 @@ using FluentValidation;
 using Blight.Models;
 using Blight.Models.Validators;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace Blight
 {
@@ -36,6 +39,34 @@ namespace Blight
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var authenticationSettings = new AuthenticationSettings();
+
+
+
+            Configuration.GetSection("Authentication").Bind(authenticationSettings);
+
+            services.AddAuthentication(
+                options =>
+                {
+                    options.DefaultAuthenticateScheme = "Bearer";
+                    options.DefaultChallengeScheme = "Bearer";
+                    options.DefaultScheme = "Bearer";
+                }).AddJwtBearer(
+                cfg =>
+                {
+                    cfg.RequireHttpsMetadata = false;
+                    cfg.SaveToken = true;
+                    cfg.TokenValidationParameters = new TokenValidationParameters()
+                    {
+                        ValidIssuer = authenticationSettings.JwtIssuer,
+                        ValidAudience = authenticationSettings.JwtIssuer,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authenticationSettings.JwtKey))
+                    };
+                });
+                
+                
+                
+                
             services.AddControllers()
                     .AddFluentValidation();
 
@@ -48,6 +79,7 @@ namespace Blight
             services.AddAutoMapper(typeof(Startup));
             services.AddScoped<ErrorHandlingMiddleware>();
             services.AddScoped<IValidator<RegisterUserDto>, RegisterUserDtoValidator>();
+            services.AddScoped<IPasswordHasher<RegisterUserDto>, PasswordHasher<RegisterUserDto>>();
             services.AddScoped<IGenericRepository2<User>, UserRepos2>();
             services.AddScoped<IGenericRepository2<PhoneNumber>, PhoneRepos2>();
 
@@ -64,7 +96,9 @@ namespace Blight
             }
 
             app.UseMiddleware<ErrorHandlingMiddleware>();
-           
+
+            app.UseAuthentication();
+
             app.UseHttpsRedirection();
 
             app.UseRouting();

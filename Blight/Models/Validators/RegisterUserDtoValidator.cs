@@ -61,12 +61,6 @@ namespace Blight.Models.Validators
             RuleFor(s => s.DateOfBirth)
                 .NotEmpty();
                 
-
-
-
         }
-
-
-
     }
 }

@@ -11,16 +11,40 @@ using Blight.Exceptions;
 using Blight.Interfaces;
 using AutoMapper;
 using Blight.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace Blight.Repository
 {
-    public class UserRepos2 : GenericRepository2<User>
+    public class UserRepos2 : GenericRepository2<User>,IUserRepository
     {
         private readonly IMapper _mapper;
+        private readonly IPasswordHasher<RegisterUserDto> _passwordHasher;
 
-        public UserRepos2(BlightDbContext blightDbContext, IMapper mapper) : base(blightDbContext,mapper)
+        public UserRepos2(BlightDbContext blightDbContext, IMapper mapper, IPasswordHasher<RegisterUserDto> passwordHasher) : base(blightDbContext, mapper)
         {
             _mapper = mapper;
+            _passwordHasher = passwordHasher;
+        }
+
+        public override async Task<User> Create(IDto dto)
+        {
+            var user = _mapper.Map<RegisterUserDto>(dto);
+            var password = user.Password;
+
+            var hashedPassword = _passwordHasher.HashPassword(user, password);
+            user.Password = hashedPassword;
+            return await base.Create(user);
+        }
+
+        public async Task Login(IDto dto)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<User> Register(IDto dto)
+        {
+            return await Create(dto);
+
         }
 
         public override async Task<User> Update(int id,IDto dto)
@@ -69,13 +93,6 @@ namespace Blight.Repository
             return existingUser;
         }
 
-
-
-
-
-
     }
-
-
 
 }

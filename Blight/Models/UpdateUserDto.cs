@@ -12,7 +12,6 @@ namespace Blight.Models
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        [DataType(DataType.Date, ErrorMessage = "Enter Date as yyyy-MM-dd")]
         public DateTime? DateOfBirth { get; set; }
         public string Nationality { get; set; }
 

@@ -35,12 +35,10 @@ namespace Blight.Repository
             }
 
             return await Update(phoneNumber,existingPhoneNumber);
-
         }
 
         private async Task<PhoneNumber> Update(PhoneNumber mappedNumber, PhoneNumber existingPhoneNumber)
         {
-
             mappedNumber.Id = existingPhoneNumber.Id;
             mappedNumber.Notified = existingPhoneNumber.Notified;
             mappedNumber.Notified++;
@@ -59,12 +57,5 @@ namespace Blight.Repository
 
             return mappedNumber;
         }
-
-
-
-
-
-
-
     }
 }

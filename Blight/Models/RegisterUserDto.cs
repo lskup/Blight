@@ -12,10 +12,13 @@ namespace Blight.Models
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        [EmailAddress]
         public string Email { get; set; }
+        [DataType(DataType.Password)]
         public string Password { get; set; }
+        [DataType(DataType.Password)]
         public string PasswordConfirmation { get; set; }
-        [DataType(DataType.Date,ErrorMessage ="Enter Date as yyyy-MM-dd"),DisplayFormat(DataFormatString ="yyyy-MM-dd")]
+        [DataType(DataType.Date),DisplayFormat(DataFormatString ="yyyy-MM-dd")]
         public DateTime DateOfBirth { get; set; }
         public string Nationality { get; set; }
     }

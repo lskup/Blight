@@ -20,11 +20,20 @@ namespace Blight.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IGenericRepository2<User> _userRepos2;
+        private readonly IUserRepository _user;
 
         public UsersController(IGenericRepository2<User> userRepos2)
         {
             _userRepos2 = userRepos2;
         }
+
+        [HttpPost("login")]
+        public async Task<ActionResult>Login([FromBody]LoginUserDto dto)
+        {
+            _userRepos2.Login(dto);
+            return Ok();
+        }
+
 
         // GET: api/<UsersController>
         [HttpGet]
@@ -46,7 +55,7 @@ namespace Blight.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<User>> Post([FromBody] RegisterUserDto dto)
         {
-            var result = await _userRepos2.Create(dto);
+            var result = await _userRepos2.Register(dto);
 
             return CreatedAtAction(
                 nameof(Get),
