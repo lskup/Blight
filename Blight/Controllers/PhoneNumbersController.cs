@@ -15,9 +15,9 @@ namespace Blight.Controllers
     [ApiController]
     public class PhoneNumbersController : ControllerBase
     {
-        private readonly IGenericRepository2<PhoneNumber> _phoneNumberRepos2;
+        private readonly IGenericRepository<PhoneNumber> _phoneNumberRepos2;
 
-        public PhoneNumbersController(IGenericRepository2<PhoneNumber> phoneNumberRepos2)
+        public PhoneNumbersController(IGenericRepository<PhoneNumber> phoneNumberRepos2)
         {
             _phoneNumberRepos2 = phoneNumberRepos2;
         }

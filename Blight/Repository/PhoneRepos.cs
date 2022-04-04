@@ -13,11 +13,11 @@ using AutoMapper;
 
 namespace Blight.Repository
 {
-    public class PhoneRepos2 : GenericRepository2<PhoneNumber>
+    public class PhoneRepos : GenericRepository<PhoneNumber>
     {
         private readonly IMapper _mapper;
 
-        public PhoneRepos2(BlightDbContext blightDbContext, IMapper mapper) : base(blightDbContext,mapper)
+        public PhoneRepos(BlightDbContext blightDbContext, IMapper mapper) : base(blightDbContext,mapper)
         {
             _mapper = mapper;
         }

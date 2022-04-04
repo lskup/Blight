@@ -11,26 +11,23 @@ using NLog;
 using Microsoft.Extensions.Logging;
 
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace Blight.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly IGenericRepository2<User> _userRepos2;
-        private readonly IUserRepository _user;
+        private readonly IUserRepository _userRepos;
 
-        public UsersController(IGenericRepository2<User> userRepos2)
+        public UsersController(IUserRepository userRepos)
         {
-            _userRepos2 = userRepos2;
+            _userRepos = userRepos;
         }
 
         [HttpPost("login")]
         public async Task<ActionResult>Login([FromBody]LoginUserDto dto)
         {
-            _userRepos2.Login(dto);
+            await _userRepos.Login(dto);
             return Ok();
         }
 
@@ -39,14 +36,14 @@ namespace Blight.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetAll()
         {
-            return Ok(await _userRepos2.GetAll());
+            return Ok(await _userRepos.GetAll());
         }
 
         // GET api/<UsersController>/5
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> Get(int id)
         {
-            var result = await _userRepos2.GetById(id);
+            var result = await _userRepos.GetById(id);
 
             return Ok(result);
         }
@@ -55,7 +52,7 @@ namespace Blight.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<User>> Post([FromBody] RegisterUserDto dto)
         {
-            var result = await _userRepos2.Register(dto);
+            var result = await _userRepos.Register(dto);
 
             return CreatedAtAction(
                 nameof(Get),
@@ -67,7 +64,7 @@ namespace Blight.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, [FromBody] UpdateUserDto dto)
         {
-            await _userRepos2.Update(id, dto);
+            await _userRepos.Update(id, dto);
 
             return NoContent();
         }
@@ -76,7 +73,7 @@ namespace Blight.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await _userRepos2.Delete(id);
+            await _userRepos.Delete(id);
 
             return NoContent();
         }

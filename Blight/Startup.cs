@@ -24,6 +24,7 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace Blight
 {
@@ -45,16 +46,11 @@ namespace Blight
 
             Configuration.GetSection("Authentication").Bind(authenticationSettings);
 
-            services.AddAuthentication(
-                options =>
-                {
-                    options.DefaultAuthenticateScheme = "Bearer";
-                    options.DefaultChallengeScheme = "Bearer";
-                    options.DefaultScheme = "Bearer";
-                }).AddJwtBearer(
+            services
+                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(
                 cfg =>
                 {
-                    cfg.RequireHttpsMetadata = false;
                     cfg.SaveToken = true;
                     cfg.TokenValidationParameters = new TokenValidationParameters()
                     {
@@ -63,10 +59,6 @@ namespace Blight
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authenticationSettings.JwtKey))
                     };
                 });
-                
-                
-                
-                
             services.AddControllers()
                     .AddFluentValidation();
 
@@ -80,8 +72,8 @@ namespace Blight
             services.AddScoped<ErrorHandlingMiddleware>();
             services.AddScoped<IValidator<RegisterUserDto>, RegisterUserDtoValidator>();
             services.AddScoped<IPasswordHasher<RegisterUserDto>, PasswordHasher<RegisterUserDto>>();
-            services.AddScoped<IGenericRepository2<User>, UserRepos2>();
-            services.AddScoped<IGenericRepository2<PhoneNumber>, PhoneRepos2>();
+            services.AddScoped<IUserRepository, UserRepos>();
+            services.AddScoped<IGenericRepository<PhoneNumber>, PhoneRepos>();
 
         }
 

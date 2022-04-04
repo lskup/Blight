@@ -14,13 +14,13 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Blight.Repository
 {
-    public class GenericRepository2<T> : IGenericRepository2<T> where T : class
+    public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         protected readonly BlightDbContext _blightDbContext;
         internal DbSet<T> _dbSet;
         private readonly IMapper _mapper;
 
-        public GenericRepository2(BlightDbContext blightDbContext, IMapper mapper)
+        public GenericRepository(BlightDbContext blightDbContext, IMapper mapper)
         {
             _blightDbContext = blightDbContext;
             _dbSet = _blightDbContext.Set<T>();
@@ -63,7 +63,7 @@ namespace Blight.Repository
             return result;
         }
 
-        public virtual async Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>> predicate)
+        public virtual async Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? predicate)
         {
             if (predicate is null)
             {

@@ -15,12 +15,13 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Blight.Repository
 {
-    public class UserRepos2 : GenericRepository2<User>,IUserRepository
+    public class UserRepos : GenericRepository<User>, IUserRepository
     {
         private readonly IMapper _mapper;
         private readonly IPasswordHasher<RegisterUserDto> _passwordHasher;
 
-        public UserRepos2(BlightDbContext blightDbContext, IMapper mapper, IPasswordHasher<RegisterUserDto> passwordHasher) : base(blightDbContext, mapper)
+        public UserRepos(BlightDbContext blightDbContext, IMapper mapper, IPasswordHasher<RegisterUserDto> passwordHasher)
+            : base(blightDbContext, mapper)
         {
             _mapper = mapper;
             _passwordHasher = passwordHasher;
@@ -29,16 +30,24 @@ namespace Blight.Repository
         public override async Task<User> Create(IDto dto)
         {
             var user = _mapper.Map<RegisterUserDto>(dto);
-            var password = user.Password;
+            string? password = user.Password;
 
-            var hashedPassword = _passwordHasher.HashPassword(user, password);
+            string? hashedPassword = _passwordHasher.HashPassword(user, password);
             user.Password = hashedPassword;
             return await base.Create(user);
         }
 
         public async Task Login(IDto dto)
         {
-            throw new NotImplementedException();
+            //var result = VerifyUserPassword();
+            //if (!result)
+            //{
+            //    throw new BadRequestException("Email or Password is not correct");
+            //}
+
+            //string jwt = GenerateJWT(dto);
+
+
         }
 
         public async Task<User> Register(IDto dto)
@@ -47,14 +56,14 @@ namespace Blight.Repository
 
         }
 
-        public override async Task<User> Update(int id,IDto dto)
+        public override async Task<User> Update(int id, IDto dto)
         {
-            //var user = _mapper.Map<User>(dto);
+            // var user = _mapper.Map<User>(dto);
 
             var user = dto;
 
-            var existingUser = await FindElement
-                (e => e.Id == id);
+            var existingUser = await FindElement(
+                e => e.Id == id);
 
             if (existingUser == null)
             {
@@ -73,7 +82,7 @@ namespace Blight.Repository
                 {
                     if(existingUserProperties[i].Name == dtoProperties[j].Name)
                     {
-                        var propertyValue = dtoProperties[j].GetValue(user);
+                        object? propertyValue = dtoProperties[j].GetValue(user);
 
                         if(propertyValue != null)
                         {

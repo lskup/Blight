@@ -9,10 +9,10 @@ using Blight.Interfaces;
 
 namespace Blight.Interfaces
 {
-    public interface IUserRepository:IGenericRepository2<User>
+    public interface IUserRepository:IGenericRepository<User>
     {
         Task Login(IDto dto);
-        Task Register(IDto dto);
+        Task<User> Register(IDto dto);
 
     }
 }

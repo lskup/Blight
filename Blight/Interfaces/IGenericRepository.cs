@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Blight.Interfaces
 {
-    public interface IGenericRepository2<T> where T : class
+    public interface IGenericRepository<T> where T : class
     {
-        Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>> predicate = null);
+        Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? predicate = null);
         Task<T> GetById(int id);
         Task<T> Create(IDto entity);
         Task Delete(int id);
