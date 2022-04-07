@@ -72,7 +72,7 @@ namespace Blight
             services.AddScoped<ErrorHandlingMiddleware>();
             services.AddScoped<IValidator<RegisterUserDto>, RegisterUserDtoValidator>();
             services.AddScoped<IPasswordHasher<RegisterUserDto>, PasswordHasher<RegisterUserDto>>();
-            services.AddScoped<IUserRepository, UserRepos>();
+            services.AddScoped<IGenericRepository<User>, UserRepos>();
             services.AddScoped<IGenericRepository<PhoneNumber>, PhoneRepos>();
 
         }

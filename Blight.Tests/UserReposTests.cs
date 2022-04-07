@@ -24,191 +24,206 @@ namespace Blight.Tests
     public class UserReposTests
     {
 
-        private async Task<BlightDbContext> GetDataBaseContext()
+        public Mock<IGenericRepository<User>> mock = new Mock<IGenericRepository<User>>();
+
+        //How to use ==>[MemberData(nameof(predicates_GetAllMethod))]
+        public static TheoryData<Expression<Func<User, bool>>> predicates_GetAllMethod = new TheoryData<Expression<Func<User, bool>>>()
         {
-            var options = new DbContextOptionsBuilder<BlightDbContext>()
-                    .UseInMemoryDatabase("InMemoryBlight")
-                    .Options;
-            var databaseContext = new BlightDbContext(options);
-            databaseContext.Database.EnsureCreated();
+            {x=>x.RoleId ==2 },
+            {c=>c.Id <=2 },
+            {k=>k.FirstName=="testName1" },
+        };
 
-            bool userExists = await databaseContext.Users.AnyAsync();
-            bool phoneExists = await databaseContext.PhoneNumbers.AnyAsync();
-
-            if(!userExists && !phoneExists)
+        public static RegisterUserDto userDto()
+        {
+            return new RegisterUserDto()
             {
-                for (int i = 1; i < 3; i++)
-                {
-                    await databaseContext.Users.AddAsync(new User()
-                    {
-                        FirstName = "testName" + i,
-                        LastName = "testName" + i,
-                        Email = $"test{i}@test.com",
-                        DateOfBirth = DateTime.Parse("1999-12-01"),
-                        Nationality = "test",
-                        HashedPassword = "sad325sadcd5fds5d5"
-
-                    });
-                    await databaseContext.PhoneNumbers.AddAsync(new PhoneNumber()
-                    {
-                        Prefix = $"4{i}",
-                        Number = "123456789",
-                        IsBully = false,
-                        Notified = 1
-                    });
-                    await databaseContext.SaveChangesAsync();
-                }
-            }
-
-            return databaseContext;
+                FirstName = "FirstName",
+                LastName = "LastName",
+            };
         }
-        public Mock<IUserRepository> mock = new Mock<IUserRepository>();
-
-        // used with [Theory]
-        // [MemberData(nameof(dataExpression))]
-        //public static TheoryData<Expression<Func<User, bool>>> dataExpression = new TheoryData<Expression<Func<User, bool>>>()
-        //{
-        //    {x=>x.RoleId ==2 }
-        //};
 
         [Fact]
-        public async void GetAll_PredicateIsNull_ListOfUsers()
+        public async Task GetAll_PredicateIsNull_AllUsers()
         {
-            // arrange
-            mock.Setup(x => x.GetAll(null))
-                .Returns((ListOfUsers()));
+            //Arrange  
+            var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
+            UserRepos userRepos = new UserRepos(_dbContext, null, null);
 
-            // act
-            UsersController usersController = new UsersController(mock.Object);
+            //Act  
+            var users = await userRepos.GetAll(null);
 
-            var result = await usersController.GetAll();
-
-            // assert
-
-            OkObjectResult objectResult = Assert.IsType<OkObjectResult>(result.Result);
-            List<User> userList = Assert.IsType<List<User>>(objectResult.Value);
-            Assert.NotNull(userList);
-            Assert.Equal(ListOfUsers().Result.Count(), userList.Count());
+            //Assert  
+            Assert.NotNull(users);
+            Assert.Equal(3, users.Count());
+            Assert.Equal("testName1", users.First().FirstName);
         }
 
-        //public async void FindElement__Dependend_Of_Given_Predicate__ElementFromDb(Expression<Func<User, bool>> predicate)
-        //{
-        //    // arrange
-        //    mock.Setup(x => x.FindElement(predicate))
-        //        .ReturnsAsync(FindUserInsideListOfUsers(predicate).Result);
-        //    // act
-        //    UsersController usersController = new UsersController(mock.Object);
+        [Theory]
+        [MemberData(nameof(predicates_GetAllMethod))]
+        public async Task GetAll_RandomPredicate_ListOfUsers(Expression<Func<User, bool>>? predicate)
+        {
+            //Arrange  
+            var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
+            UserRepos userRepos = new UserRepos(_dbContext, null, null);
 
-        //    // assert
+            //Act  
+            var users = await userRepos.GetAll(predicate);
 
-        //}
-
-        //[Theory]
-        //[InlineData(1)]
-        //[InlineData(2)]
-        //public async void GetById__Given_Existing_Id__User(int id)
-        //{
-        //    // arrange
-        //    var selectedUser = FindUserInsideListOfUsers(x => x.Id == id);
-
-        //    mock.Setup(x => x.GetById(id))
-        //        .Returns(Task.FromResult(selectedUser));
-
-        //    // act
-        //    UsersController usersController = new UsersController(mock.Object);
-        //    var result = await usersController.Get(id);
-
-        //    // assert
-
-        //    OkObjectResult okObjectResult = Assert.IsType<OkObjectResult>(result.Result);
-        //    User user = Assert.IsType<User>(okObjectResult.Value);
-
-        //    Assert.Equal(selectedUser, user);
-
-        //}
+            //Assert  
+            Assert.NotNull(users);
+            Assert.IsType(typeof(List<User>), users);
+        }
 
         [Theory]
         [InlineData(1)]
         [InlineData(2)]
-        public void GetById_GivenId_User(int id)
+        public async void GetById_ExistingId_User(int id)
         {
-            // arrange
-            var mocker = new AutoMocker();
-            var user = FindUserInsideListOfUsers(x=>x.Id ==id);
+            // Arrange
+            var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
+            UserRepos userRepos = new UserRepos(_dbContext, null, null);
 
+            // Act
+            var user = await userRepos.GetById(id);
 
-            mocker.Setup<IUserRepository, Task<User>>
-                (s => s.GetById(id))
-                .Returns(Task.FromResult(user));
-
-            // act
-            var mock = mocker.Get<IUserRepository>();
-            var testedUser = mock.GetById(id);
-
-            // assert
-            Assert.Equal(user, testedUser.Result);
-            Assert.Equal(user.FirstName, testedUser.Result.FirstName);
-
+            // Assert
+            Assert.NotNull(user);
+            Assert.Equal($"testName{id}", user.FirstName);
         }
 
         [Theory]
-        [InlineData(3)]
-        [InlineData(10)]
-        public async void GetById_IdOutOfRange_ThrowNotFoundException(int id)
+        [InlineData(6)]
+        [InlineData(12)]
+        public async void GetById_NotExistId_NotFoundException(int id)
         {
-            // arrange
-            var mocker = new AutoMocker();
-            var user = FindUserInsideListOfUsers(x => x.Id == id);
+            // Arrange
+            var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
+            UserRepos userRepos = new UserRepos(_dbContext, null, null);
 
-            //mocker.Setup<IUserRepository, Task<User>>
-            //    (s => s.GetById(id))
-            //    .Returns(Task.FromResult(user));
+            // Act
+            var action = async () => await userRepos.GetById(id);
 
-            // act
-            var mock = mocker.Get<IUserRepository>();
-            var testedUser = mock.GetById(id);
-
-            // assert
-            await Assert.ThrowsAsync<NotFoundException>(() => testedUser);
+            // Assert
+            var caughtException = Assert.ThrowsAsync<NotFoundException>(action);
+            Assert.Equal("Element not found", caughtException.Result.Message);
         }
 
-        private async Task<IEnumerable<User>> ListOfUsers()
+        [Fact]
+        public async void Create_IDtoObjectReturnedByMapper_NewUser()
         {
-            List<User> testUsers = new List<User>
+            // Arrange
+            var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
+            var mapper = new Mock<IMapper>();
+            mapper.SetReturnsDefault(new User()
             {
-                new User()
-                {
-                    Id =1,
-                    FirstName = "testFirstName1",
-                    LastName = "testLastName1",
-                    Email = "test1@test.com",
-                    HashedPassword = "12df4fdg5gbvbv4"
-                },
-                new User()
-                {
-                    Id =2,
-                    FirstName = "testFirstName2",
-                    LastName = "testLastName2",
-                    Email = "test2@test.com",
-                    HashedPassword = "12df4fdg5gbvbv4"
+                FirstName = "testUser0",
+                LastName = "testUser0",
+                Email = "test0@user.com",
+                HashedPassword = "sdf543fs5ds"
+            });
 
-                }
-            };
-        
-            return testUsers;
+            GenericRepository<User> userRepos = new GenericRepository<User>(_dbContext, mapper.Object);
+
+            // Act
+            var user = await userRepos.Create(null);
+
+            // Assert
+            Assert.NotNull(user);
+            Assert.Equal("testUser0", user.FirstName);
+            Assert.Equal(4, _dbContext.Users.Count());
         }
 
-        private  User FindUserInsideListOfUsers(Expression<Func<User, bool>> predicate)
+        [Fact]
+        public async void Create_NewUser_ReturnNewUser()
         {
-            var testUsers = ListOfUsers();
+            // Arrange
+            var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
+            var mapper = new Mock<IMapper>();
+            var hasher = new Mock<IPasswordHasher<RegisterUserDto>>();
+            mapper.SetReturnsDefault(new User()
+            {
+                FirstName = "testUser0",
+                LastName = "testUser0",
+                Email = "test0@user.com",
+            });
 
-            var selectedUser = testUsers
-                .Result
-                .AsQueryable()
-                .SingleOrDefault(predicate);
-            
-            return selectedUser;
+            hasher.SetReturnsDefault<string>("sd33454cecreds");
+
+
+            UserRepos userRepos = new UserRepos(_dbContext, mapper.Object,hasher.Object);
+
+            // Act
+            var user = await userRepos.Create(null);
+
+            // Assert
+            Assert.NotNull(user);
+            Assert.Equal("testUser0", user.FirstName);
+            Assert.Equal(4, _dbContext.Users.Count());
         }
+
+
+
+
+        [Fact]
+        public async void Delete_ExistedId_DbElementsNumber()
+        {
+            // Arrange
+            var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
+
+            GenericRepository<User> userRepos = new GenericRepository<User>(_dbContext,null);
+
+            // Act
+            await userRepos.Delete(1);
+
+            // Assert
+            Assert.Equal(2, _dbContext.Users.Count());
+        }
+
+        [Fact]
+        public async void Update_PassingExistingIdAndUserInfo_UpdatedUser()
+        {
+            // Arrange
+            var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
+            var userDto = new UpdateUserDto()
+            {
+                FirstName = "Martin",
+                LastName = "Tester",
+                Nationality = "Germany"
+            };
+            UserRepos userRepos = new UserRepos(_dbContext, null,null);
+
+            // Act
+            var updatedUser = await userRepos.Update(1,userDto);
+
+            // Assert
+            Assert.NotNull(updatedUser);
+            Assert.Equal("Martin", updatedUser.FirstName);
+            Assert.Equal("Martin", _dbContext.Users.First().FirstName);
+        }
+
+        [Fact]
+        public async void Update_NotExistingId_NotFoundException()
+        {
+            // Arrange
+            var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
+            var userDto = new UpdateUserDto()
+            {
+                FirstName = "Martin",
+                LastName = "Tester",
+                Nationality = "Germany"
+            };
+            UserRepos userRepos = new UserRepos(_dbContext, null, null);
+
+            // Act
+            var action =async() => await userRepos.Update(10, userDto);
+
+            // Assert
+            var caughtException = Assert.ThrowsAsync<NotFoundException>(action);
+            Assert.Equal("User not found", caughtException.Result.Message);
+        }
+
+
 
     }
 }

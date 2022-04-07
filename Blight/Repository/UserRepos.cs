@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Blight.Repository
 {
-    public class UserRepos : GenericRepository<User>, IUserRepository
+    public class UserRepos : GenericRepository<User>
     {
         private readonly IMapper _mapper;
         private readonly IPasswordHasher<RegisterUserDto> _passwordHasher;
@@ -37,28 +37,8 @@ namespace Blight.Repository
             return await base.Create(user);
         }
 
-        public async Task Login(IDto dto)
-        {
-            //var result = VerifyUserPassword();
-            //if (!result)
-            //{
-            //    throw new BadRequestException("Email or Password is not correct");
-            //}
-
-            //string jwt = GenerateJWT(dto);
-
-
-        }
-
-        public async Task<User> Register(IDto dto)
-        {
-            return await Create(dto);
-
-        }
-
         public override async Task<User> Update(int id, IDto dto)
         {
-            // var user = _mapper.Map<User>(dto);
 
             var user = dto;
 
@@ -67,7 +47,7 @@ namespace Blight.Repository
 
             if (existingUser == null)
             {
-                throw new NotFoundException("User not Found");
+                throw new NotFoundException("User not found");
             }
 
             var dtoProperties = user.GetType()

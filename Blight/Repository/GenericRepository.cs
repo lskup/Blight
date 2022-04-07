@@ -83,7 +83,7 @@ namespace Blight.Repository
             var result = await _dbSet.FindAsync(id);
             if (result is null)
             {
-                throw new NotFoundException("Element not Found");
+                throw new NotFoundException("Element not found");
             }
             
             return result;
