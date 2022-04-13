@@ -42,7 +42,7 @@ namespace Blight.Tests
         [Theory]
         [InlineData(1)]
         [InlineData(2)]
-        public async void GetById_ExistingId_PhoneNumber(int id)
+        public async Task GetById_ExistingId_PhoneNumber(int id)
         {
             // Arrange
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
@@ -59,7 +59,7 @@ namespace Blight.Tests
         [Theory]
         [InlineData(6)]
         [InlineData(12)]
-        public async void GetById_NotExistId_NotFoundException(int id)
+        public async Task GetById_NotExistId_NotFoundException(int id)
         {
             // Arrange
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
@@ -74,7 +74,7 @@ namespace Blight.Tests
         }
 
         [Fact]
-        public async void Create_NewNumber_ReturnsNewNumber()
+        public async Task Create_NewNumber_ReturnsNewNumber()
         {
             // Arrange
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
@@ -97,9 +97,30 @@ namespace Blight.Tests
 
         }
 
+        [Fact]
+        public async Task Create_ExistingNumber_UpdateNotifyProperty()
+        {
+            //Użytkownik zgłasza nękający numer. Jeśli numer istnieje w bazie danych, jego właściwość
+            // Notified powinna się zwiększyć o 1.
 
 
+            // Arrange
+            var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
+            var mapper = new Mock<IMapper>();
+            var existingNumber = _dbContext.PhoneNumbers.First();
+            int notifyValue = existingNumber.Notified;
 
+            mapper.SetReturnsDefault(existingNumber);
+
+            PhoneRepos phoneRepos = new PhoneRepos(_dbContext, mapper.Object);
+
+            // Act
+            var result = await phoneRepos.Create(null);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(notifyValue+1, _dbContext.PhoneNumbers.First().Notified);
+        }
 
 
     }

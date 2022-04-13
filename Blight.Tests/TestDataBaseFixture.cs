@@ -32,7 +32,7 @@ namespace Blight.Tests
                             { FirstName = "testName",
                               LastName = "testName",
                               Email = "test@test.com",
-                              HashedPassword = "TEST_sd35r4dsfsd3svd43_TEST"
+                              Password = "TEST_sd35r4dsfsd3svd43_TEST"
                             },
                             new PhoneNumber
                             {

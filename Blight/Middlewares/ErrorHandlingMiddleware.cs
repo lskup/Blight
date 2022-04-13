@@ -33,6 +33,16 @@ namespace Blight.Middlewares
                 context.Response.ContentType = "plain/text";
                 await context.Response.WriteAsync(notFoundException.Message);
             }
+            catch (BadRequestException badRequestException)
+            {
+                _logger.LogError(badRequestException, badRequestException.Message);
+
+                context.Response.StatusCode = 400;
+                context.Response.ContentType = "plain/text";
+                await context.Response.WriteAsync(badRequestException.Message);
+            }
+
+
             catch (DataBaseException dataBaseException)
             {
                 _logger.LogError(dataBaseException, dataBaseException.Message);

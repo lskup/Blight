@@ -9,29 +9,29 @@ using Blight.Models;
 using Blight.Infrastructure;
 using NLog;
 using Microsoft.Extensions.Logging;
-
+using Microsoft.AspNetCore.Authorization;
 
 namespace Blight.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles ="Admin")]
+
     public class UsersController : ControllerBase
     {
-        private readonly IGenericRepository<User> _userRepos;
+        private readonly IUserRepository _userRepos;
 
-        public UsersController(IGenericRepository<User> userRepos)
+        public UsersController(IUserRepository userRepos)
         {
             _userRepos = userRepos;
         }
 
-        // GET: api/<UsersController>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetAll()
         {
             return Ok(await _userRepos.GetAll());
         }
 
-        // GET api/<UsersController>/5
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> Get(int id)
         {
@@ -40,8 +40,8 @@ namespace Blight.Controllers
             return Ok(result);
         }
 
-        // POST api/<UsersController>
         [HttpPost("register")]
+        [AllowAnonymous]
         public async Task<ActionResult<User>> Post([FromBody] RegisterUserDto dto)
         {
             var result = await _userRepos.Create(dto);
@@ -52,8 +52,8 @@ namespace Blight.Controllers
                 result);
         }
 
-        // PUT api/<UsersController>/5
         [HttpPut("{id}")]
+        [Authorize(Roles ="User,Admin")]
         public async Task<IActionResult> Put(int id, [FromBody] UpdateUserDto dto)
         {
             await _userRepos.Update(id, dto);
@@ -61,13 +61,23 @@ namespace Blight.Controllers
             return NoContent();
         }
 
-        // DELETE api/<UsersController>/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             await _userRepos.Delete(id);
 
             return NoContent();
         }
+
+        [HttpPost("login")]
+        [AllowAnonymous]
+        public async Task<ActionResult<User>> Login([FromBody] LoginUserDto dto)
+        {
+            var result = await _userRepos.Login(dto);
+
+            return Ok(result);
+        }
+
     }
 }

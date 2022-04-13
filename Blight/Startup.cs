@@ -25,6 +25,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Blight.Authentication;
 
 namespace Blight
 {
@@ -41,39 +42,65 @@ namespace Blight
         public void ConfigureServices(IServiceCollection services)
         {
             var authenticationSettings = new AuthenticationSettings();
-
-
-
             Configuration.GetSection("Authentication").Bind(authenticationSettings);
 
+
+            services.AddSingleton(authenticationSettings);
             services
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(
                 cfg =>
                 {
+                    cfg.RequireHttpsMetadata = false;
                     cfg.SaveToken = true;
                     cfg.TokenValidationParameters = new TokenValidationParameters()
                     {
                         ValidIssuer = authenticationSettings.JwtIssuer,
                         ValidAudience = authenticationSettings.JwtIssuer,
+                        ValidateLifetime = true,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authenticationSettings.JwtKey))
                     };
                 });
             services.AddControllers()
                     .AddFluentValidation();
 
-            services.AddSwaggerGen(c =>
+            services.AddSwaggerGen(opt =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Blight", Version = "v1" });
+                opt.SwaggerDoc("v1", new OpenApiInfo { Title = "Blight", Version = "v1" });
+                opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    In = ParameterLocation.Header,
+                    Description = "Please enter token",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    BearerFormat = "JWT",
+                    Scheme = "bearer"
+                });
+                opt.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type=ReferenceType.SecurityScheme,
+                                Id="Bearer"
+                            }
+                        },
+                        new string[]{}
+                    }
+
+                });
             });
             services.AddDbContext<BlightDbContext>(cfg =>
             cfg.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddAutoMapper(typeof(Startup));
             services.AddScoped<ErrorHandlingMiddleware>();
             services.AddScoped<IValidator<RegisterUserDto>, RegisterUserDtoValidator>();
-            services.AddScoped<IPasswordHasher<RegisterUserDto>, PasswordHasher<RegisterUserDto>>();
-            services.AddScoped<IGenericRepository<User>, UserRepos>();
+            services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+            services.AddScoped<IUserRepository, UserRepos>();
             services.AddScoped<IGenericRepository<PhoneNumber>, PhoneRepos>();
+            services.AddScoped<ISchemeGenerator, SchemesGenerator>();
 
         }
 

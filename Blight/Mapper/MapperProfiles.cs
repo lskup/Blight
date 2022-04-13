@@ -16,8 +16,7 @@ namespace Blight.Mapper
         {
             CreateMap<RegisterUserDto, User>()
                 .ForMember(c => c.BlockedNumbers, x => x.MapFrom(s => new List<PhoneNumber>()))
-                .ForMember(d => d.Email, x => x.MapFrom(j => j.Email.ToLower()))
-                .ForMember(e => e.HashedPassword, x => x.MapFrom(w => w.Password));
+                .ForMember(d => d.Email, x => x.MapFrom(j => j.Email.ToLower()));
 
             CreateMap<User, UserViewModelDto>();
             
@@ -26,6 +25,9 @@ namespace Blight.Mapper
             CreateMap<PhoneNumber, PhoneNumberDto>();
 
             CreateMap<PhoneNumberDto, PhoneNumber>();
+
+            CreateMap<LoginUserDto,User>()
+                .ForMember(d => d.Email, x => x.MapFrom(j => j.Email.ToLower()));
 
 
 

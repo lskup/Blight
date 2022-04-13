@@ -14,8 +14,10 @@ namespace Blight.Tests
 
         public static async Task<BlightDbContext> GetNewDataBaseContext()
         {
+            //Używam globalnego identyfikatora, aby każdy (async)test używał własnej instancji DbContext.
+
             var options = new DbContextOptionsBuilder<BlightDbContext>()
-                    .UseInMemoryDatabase("InMemoryBlight")
+                    .UseInMemoryDatabase(Guid.NewGuid().ToString())
                     .Options;
             var databaseContext = new BlightDbContext(options);
             databaseContext.Database.EnsureCreated();
@@ -34,7 +36,7 @@ namespace Blight.Tests
                         Email = $"test{i}@test.com",
                         DateOfBirth = DateTime.Parse("1999-12-01"),
                         Nationality = "test",
-                        HashedPassword = "sad325sadcd5fds5d5",
+                        Password = "sad325sadcd5fds5d5",
                         RoleId = i % 2 == 1 ? 1 : 2,
 
                     });

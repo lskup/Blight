@@ -26,7 +26,7 @@ namespace Blight.Tests
 
         public Mock<IGenericRepository<User>> mock = new Mock<IGenericRepository<User>>();
 
-        //How to use ==>[MemberData(nameof(predicates_GetAllMethod))]
+        //Cel - mo¿liwoœæ przekazania predykaty jako parametr testu |==>[MemberData(nameof(predicates_GetAllMethod))]
         public static TheoryData<Expression<Func<User, bool>>> predicates_GetAllMethod = new TheoryData<Expression<Func<User, bool>>>()
         {
             {x=>x.RoleId ==2 },
@@ -34,21 +34,12 @@ namespace Blight.Tests
             {k=>k.FirstName=="testName1" },
         };
 
-        public static RegisterUserDto userDto()
-        {
-            return new RegisterUserDto()
-            {
-                FirstName = "FirstName",
-                LastName = "LastName",
-            };
-        }
-
         [Fact]
         public async Task GetAll_PredicateIsNull_AllUsers()
         {
             //Arrange  
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
-            UserRepos userRepos = new UserRepos(_dbContext, null, null);
+            UserRepos userRepos = new UserRepos(_dbContext, null, null,null);
 
             //Act  
             var users = await userRepos.GetAll(null);
@@ -65,7 +56,7 @@ namespace Blight.Tests
         {
             //Arrange  
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
-            UserRepos userRepos = new UserRepos(_dbContext, null, null);
+            UserRepos userRepos = new UserRepos(_dbContext, null, null,null);
 
             //Act  
             var users = await userRepos.GetAll(predicate);
@@ -78,11 +69,11 @@ namespace Blight.Tests
         [Theory]
         [InlineData(1)]
         [InlineData(2)]
-        public async void GetById_ExistingId_User(int id)
+        public async Task GetById_ExistingId_User(int id)
         {
             // Arrange
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
-            UserRepos userRepos = new UserRepos(_dbContext, null, null);
+            UserRepos userRepos = new UserRepos(_dbContext, null, null,null);
 
             // Act
             var user = await userRepos.GetById(id);
@@ -95,11 +86,11 @@ namespace Blight.Tests
         [Theory]
         [InlineData(6)]
         [InlineData(12)]
-        public async void GetById_NotExistId_NotFoundException(int id)
+        public async Task GetById_NotExistId_NotFoundException(int id)
         {
             // Arrange
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
-            UserRepos userRepos = new UserRepos(_dbContext, null, null);
+            UserRepos userRepos = new UserRepos(_dbContext, null, null,null);
 
             // Act
             var action = async () => await userRepos.GetById(id);
@@ -110,48 +101,26 @@ namespace Blight.Tests
         }
 
         [Fact]
-        public async void Create_IDtoObjectReturnedByMapper_NewUser()
+        public async Task Create_MapperThrowsNewUser_ReturnNewUser()
         {
+            //Parametr metody Create (IDto dto) jest mapowany w ciele metody na obiekt User. Mapper jest zdublowany i zwraca konkretny obiekt User,
+            //dlatego nie ma sensu przekazywanie obiektu (dto) jako parametr testowy.
+
             // Arrange
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
             var mapper = new Mock<IMapper>();
+            var hasher = new Mock<IPasswordHasher<User>>();
+           
             mapper.SetReturnsDefault(new User()
             {
                 FirstName = "testUser0",
                 LastName = "testUser0",
                 Email = "test0@user.com",
-                HashedPassword = "sdf543fs5ds"
+                Password = "tester"
             });
-
-            GenericRepository<User> userRepos = new GenericRepository<User>(_dbContext, mapper.Object);
-
-            // Act
-            var user = await userRepos.Create(null);
-
-            // Assert
-            Assert.NotNull(user);
-            Assert.Equal("testUser0", user.FirstName);
-            Assert.Equal(4, _dbContext.Users.Count());
-        }
-
-        [Fact]
-        public async void Create_NewUser_ReturnNewUser()
-        {
-            // Arrange
-            var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
-            var mapper = new Mock<IMapper>();
-            var hasher = new Mock<IPasswordHasher<RegisterUserDto>>();
-            mapper.SetReturnsDefault(new User()
-            {
-                FirstName = "testUser0",
-                LastName = "testUser0",
-                Email = "test0@user.com",
-            });
-
             hasher.SetReturnsDefault<string>("sd33454cecreds");
 
-
-            UserRepos userRepos = new UserRepos(_dbContext, mapper.Object,hasher.Object);
+            UserRepos userRepos = new UserRepos(_dbContext, mapper.Object,hasher.Object,null);
 
             // Act
             var user = await userRepos.Create(null);
@@ -160,13 +129,41 @@ namespace Blight.Tests
             Assert.NotNull(user);
             Assert.Equal("testUser0", user.FirstName);
             Assert.Equal(4, _dbContext.Users.Count());
+            Assert.Equal("testUser0", _dbContext.Users.Last().FirstName);
         }
 
+        [Fact]
+        public async Task Create_AdminPassword_ReturnNewUserRoleId_2()
+        {
+            //Parametr metody Create (IDto dto) jest mapowany w ciele metody na obiekt User. Mapper jest zdublowany i zwraca konkretny obiekt User,
+            //dlatego nie ma sensu przekazywanie obiektu (dto) jako parametr testowy.
 
+            // Arrange
+            var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
+            var mapper = new Mock<IMapper>();
+            var hasher = new Mock<IPasswordHasher<User>>();
 
+            mapper.SetReturnsDefault(new User()
+            {
+                FirstName = "admin",
+                LastName = "admin",
+                Email = "admin@user.com",
+                Password = "Admin123!"
+            });
+            hasher.SetReturnsDefault<string>("sd33454cecreds3df");
+
+            UserRepos userRepos = new UserRepos(_dbContext, mapper.Object, hasher.Object, null);
+
+            // Act
+            var user = await userRepos.Create(null);
+
+            // Assert
+            Assert.NotNull(user);
+            Assert.Equal(2, user.RoleId);
+        }
 
         [Fact]
-        public async void Delete_ExistedId_DbElementsNumber()
+        public async Task Delete_ExistedId_DbElementsNumber()
         {
             // Arrange
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
@@ -181,7 +178,7 @@ namespace Blight.Tests
         }
 
         [Fact]
-        public async void Update_PassingExistingIdAndUserInfo_UpdatedUser()
+        public async Task Update_PassingExistingIdAndUserInfo_UpdatedUser()
         {
             // Arrange
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
@@ -191,7 +188,7 @@ namespace Blight.Tests
                 LastName = "Tester",
                 Nationality = "Germany"
             };
-            UserRepos userRepos = new UserRepos(_dbContext, null,null);
+            UserRepos userRepos = new UserRepos(_dbContext, null,null,null);
 
             // Act
             var updatedUser = await userRepos.Update(1,userDto);
@@ -203,7 +200,7 @@ namespace Blight.Tests
         }
 
         [Fact]
-        public async void Update_NotExistingId_NotFoundException()
+        public async Task Update_NotExistingId_NotFoundException()
         {
             // Arrange
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
@@ -213,7 +210,7 @@ namespace Blight.Tests
                 LastName = "Tester",
                 Nationality = "Germany"
             };
-            UserRepos userRepos = new UserRepos(_dbContext, null, null);
+            UserRepos userRepos = new UserRepos(_dbContext, null, null,null);
 
             // Act
             var action =async() => await userRepos.Update(10, userDto);
@@ -222,8 +219,6 @@ namespace Blight.Tests
             var caughtException = Assert.ThrowsAsync<NotFoundException>(action);
             Assert.Equal("User not found", caughtException.Result.Message);
         }
-
-
 
     }
 }

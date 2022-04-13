@@ -11,8 +11,7 @@ namespace Blight.Interfaces
 {
     public interface IUserRepository:IGenericRepository<User>
     {
-        Task Login(IDto dto);
-        Task<User> Register(IDto dto);
+        Task<string> Login(IDto dto);
 
     }
 }

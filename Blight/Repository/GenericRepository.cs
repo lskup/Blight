@@ -29,6 +29,7 @@ namespace Blight.Repository
 
         public virtual async Task<T> Create(IDto dto)
         {
+
             var mappedObject =_mapper.Map<T>(dto);
 
             var result = await _dbSet.AddAsync(mappedObject);
