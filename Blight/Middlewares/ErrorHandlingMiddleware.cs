@@ -42,7 +42,6 @@ namespace Blight.Middlewares
                 await context.Response.WriteAsync(badRequestException.Message);
             }
 
-
             catch (DataBaseException dataBaseException)
             {
                 _logger.LogError(dataBaseException, dataBaseException.Message);
@@ -51,6 +50,15 @@ namespace Blight.Middlewares
                 context.Response.ContentType = "plain/text";
                 await context.Response.WriteAsync(dataBaseException.Message);
             }
+            catch (ForbiddenException forbiddenException)
+            {
+                _logger.LogError(forbiddenException, forbiddenException.Message);
+
+                context.Response.StatusCode = 403;
+                context.Response.ContentType = "plain/text";
+                await context.Response.WriteAsync(forbiddenException.Message);
+            }
+
             catch (Exception e)
             {
                 _logger.LogError(e, e.Message);

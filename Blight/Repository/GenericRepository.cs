@@ -59,7 +59,7 @@ namespace Blight.Repository
 
         public virtual async Task<T> FindElement(Expression<Func<T, bool>> predicate)
         {
-            var result = await _dbSet.SingleOrDefaultAsync(predicate);
+            var result = await _dbSet.FirstOrDefaultAsync(predicate);
 
             return result;
         }
@@ -86,7 +86,7 @@ namespace Blight.Repository
             {
                 throw new NotFoundException("Element not found");
             }
-            
+
             return result;
         }
 

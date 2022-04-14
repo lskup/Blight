@@ -38,6 +38,7 @@ namespace Blight.Tests
                         Nationality = "test",
                         Password = "sad325sadcd5fds5d5",
                         RoleId = i % 2 == 1 ? 1 : 2,
+                        BlockedNumbers = new List<PhoneNumber>(),
 
                     });
                     await databaseContext.PhoneNumbers.AddAsync(new PhoneNumber()
@@ -46,6 +47,7 @@ namespace Blight.Tests
                         Number = "123456789",
                         Notified = 18 + i,
                         IsBully = i>20? true:false,
+                        Users = new List<User>(),
 
                     }); 
                     await databaseContext.SaveChangesAsync();

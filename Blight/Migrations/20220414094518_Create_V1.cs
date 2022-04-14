@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Blight.Migrations
 {
-    public partial class Create_v1 : Migration
+    public partial class Create_V1 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

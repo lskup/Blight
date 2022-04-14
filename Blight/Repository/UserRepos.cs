@@ -120,10 +120,25 @@ namespace Blight.Repository
         public async override Task<User> FindElement(Expression<Func<User, bool>> predicate)
         {
             var result = await _dbSet
+                .Include(p=>p.BlockedNumbers)
                 .Include(x => x.Role)
                 .SingleOrDefaultAsync(predicate);
 
             return result;
+        }
+
+        public async override Task<User> GetById(int id)
+        {
+            var result = await _dbSet
+                    .Include(p => p.BlockedNumbers)
+                    .FirstOrDefaultAsync(x => x.Id == id);
+            if (result is null)
+            {
+                throw new NotFoundException("Element not found");
+            }
+
+            return result;
+
         }
 
     }

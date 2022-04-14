@@ -16,10 +16,12 @@ namespace Blight.Repository
     public class PhoneRepos : GenericRepository<PhoneNumber>
     {
         private readonly IMapper _mapper;
+        private readonly IUserContextService _userContextService;
 
-        public PhoneRepos(BlightDbContext blightDbContext, IMapper mapper) : base(blightDbContext,mapper)
+        public PhoneRepos(BlightDbContext blightDbContext, IMapper mapper, IUserContextService userContextService) : base(blightDbContext, mapper)
         {
             _mapper = mapper;
+            _userContextService = userContextService;
         }
         public override async Task<PhoneNumber> Create(IDto dto)
         {
@@ -29,33 +31,97 @@ namespace Blight.Repository
                 (e => e.Number == phoneNumber.Number &&
                  e.Prefix == phoneNumber.Prefix);
 
-            if (existingPhoneNumber is null)
+            var activeUser = await _blightDbContext
+                    .Users
+                    .Include(n=>n.BlockedNumbers)
+                    .SingleOrDefaultAsync(x => x.Id == _userContextService.GetUserId);
+
+            var userNumberList = activeUser.BlockedNumbers;
+
+            foreach (var userNumber in userNumberList)
             {
-                return await base.Create(dto);
+                if(userNumber.Number == phoneNumber.Number)
+                {
+                    throw new ForbiddenException("You already block this number");
+                }
             }
 
-            return await Update(phoneNumber,existingPhoneNumber);
+            if (existingPhoneNumber is null)
+            {
+                userNumberList.Add(phoneNumber);
+                await _blightDbContext.SaveChangesAsync();
+                phoneNumber.Users = null;
+                return phoneNumber;
+            }
+
+            return await Update(phoneNumber,existingPhoneNumber,activeUser,MethodType.Create);
         }
 
-        private async Task<PhoneNumber> Update(PhoneNumber mappedNumber, PhoneNumber existingPhoneNumber)
+        private async Task<PhoneNumber> Update(PhoneNumber mappedNumber, PhoneNumber existingPhoneNumber,User activeUser,MethodType methodType)
         {
             mappedNumber.Id = existingPhoneNumber.Id;
             mappedNumber.Notified = existingPhoneNumber.Notified;
-            mappedNumber.Notified++;
 
-            if (mappedNumber.IsBully == false)
+            if(methodType == MethodType.Create)
+                mappedNumber.Notified++;
+
+            if(methodType == MethodType.Delete)
+                mappedNumber.Notified--;
+
+            if(mappedNumber.Notified>20)
             {
-                if (mappedNumber.Notified > 20)
-                    mappedNumber.IsBully = true;
+                mappedNumber.IsBully = true;
+            }
+            else
+            {
+                mappedNumber.IsBully = false;
             }
 
             _blightDbContext.Entry(existingPhoneNumber)
                 .CurrentValues
                 .SetValues(mappedNumber);
 
+            activeUser.BlockedNumbers.Add(existingPhoneNumber);
             await _blightDbContext.SaveChangesAsync();
 
             return mappedNumber;
         }
+
+        public async override Task Delete(int id)
+        {
+            var phoneNumber = await GetById(id);
+
+            var activeUser = await _blightDbContext
+                    .Users
+                    .Include(n => n.BlockedNumbers)
+                    .SingleOrDefaultAsync(x => x.Id == _userContextService.GetUserId);
+
+            var userRole = activeUser.RoleId;
+
+            if(userRole == 1)
+            {
+                var userNumberList = activeUser.BlockedNumbers;
+
+                foreach (var userNumber in userNumberList)
+                {
+                    if (userNumber.Number == phoneNumber.Number)
+                    {
+                        activeUser.BlockedNumbers.Remove(phoneNumber);
+                       // var result = Update()
+                       
+                    }
+                }
+
+            }
+
+        }
+
+        private enum MethodType
+        {
+            Create,
+            Delete
+        }
+
+
     }
 }

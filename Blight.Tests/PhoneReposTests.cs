@@ -78,14 +78,21 @@ namespace Blight.Tests
         {
             // Arrange
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
-            var mapper = new Mock<IMapper>();
-            mapper.SetReturnsDefault(new PhoneNumber()
+            var stubbedMapper = new Mock<IMapper>();
+            var stubbedUser = new Mock<IUserContextService>();
+
+            stubbedMapper.SetReturnsDefault(new PhoneNumber()
             {
                 Prefix = "48",
                 Number = "987654321"
             });
 
-            PhoneRepos phoneRepos = new PhoneRepos(_dbContext, mapper.Object);
+            stubbedUser.Setup(x => x.GetUserId)
+                .Returns(1);
+
+
+
+            PhoneRepos phoneRepos = new PhoneRepos(_dbContext, stubbedMapper.Object,stubbedUser.Object);
 
             // Act
             var result = await phoneRepos.Create(null);
@@ -107,12 +114,17 @@ namespace Blight.Tests
             // Arrange
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
             var mapper = new Mock<IMapper>();
+            var stubbedUser = new Mock<IUserContextService>();
+
+
             var existingNumber = _dbContext.PhoneNumbers.First();
             int notifyValue = existingNumber.Notified;
 
             mapper.SetReturnsDefault(existingNumber);
+            stubbedUser.Setup(x => x.GetUserId)
+                       .Returns(1);
 
-            PhoneRepos phoneRepos = new PhoneRepos(_dbContext, mapper.Object);
+            PhoneRepos phoneRepos = new PhoneRepos(_dbContext, mapper.Object,stubbedUser.Object);
 
             // Act
             var result = await phoneRepos.Create(null);

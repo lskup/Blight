@@ -26,6 +26,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Blight.Authentication;
+using Blight.Services;
+using Newtonsoft.Json;
+using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
 
 namespace Blight
 {
@@ -62,7 +65,10 @@ namespace Blight
                     };
                 });
             services.AddControllers()
+                    .AddNewtonsoftJson(opt=>
+                    opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore)
                     .AddFluentValidation();
+                    
 
             services.AddSwaggerGen(opt =>
             {
@@ -101,6 +107,8 @@ namespace Blight
             services.AddScoped<IUserRepository, UserRepos>();
             services.AddScoped<IGenericRepository<PhoneNumber>, PhoneRepos>();
             services.AddScoped<ISchemeGenerator, SchemesGenerator>();
+            services.AddScoped<IUserContextService, UserContextService>();
+            services.AddHttpContextAccessor();
 
         }
 

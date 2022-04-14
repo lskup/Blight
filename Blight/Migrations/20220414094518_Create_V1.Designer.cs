@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Blight.Migrations
 {
     [DbContext(typeof(BlightDbContext))]
-    [Migration("20220407175829_Create_v1")]
-    partial class Create_v1
+    [Migration("20220414094518_Create_V1")]
+    partial class Create_V1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

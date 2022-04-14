@@ -14,5 +14,6 @@ namespace Blight.Entieties
         public int Notified { get; set; } = 1;
         public bool IsBully { get; set; } = false;
 
+        public ICollection<User> Users { get; set; }
     }
 }

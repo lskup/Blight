@@ -1,6 +1,7 @@
 ﻿using Blight.Entieties;
 using Blight.Interfaces;
 using Blight.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,8 @@ namespace Blight.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
+
     public class PhoneNumbersController : ControllerBase
     {
         private readonly IGenericRepository<PhoneNumber> _phoneNumberRepos2;
@@ -52,6 +55,7 @@ namespace Blight.Controllers
                 nameof(Get),
                 new { id = result.Id },
                 result);
+
         }
 
         // DELETE api/<UsersController>/5
