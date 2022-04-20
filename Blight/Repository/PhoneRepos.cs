@@ -54,37 +54,58 @@ namespace Blight.Repository
                 return phoneNumber;
             }
 
-            return await Update(phoneNumber,existingPhoneNumber,activeUser,MethodType.Create);
+            var updatedNumber = UpdatePhoneNumberNotification(existingPhoneNumber,MethodType.Create);
         }
 
-        private async Task<PhoneNumber> Update(PhoneNumber mappedNumber, PhoneNumber existingPhoneNumber,User activeUser,MethodType methodType)
+        private async Task<PhoneNumber> UpdatePhoneNumberNotification(PhoneNumber existingInDb,MethodType methodType)
         {
-            mappedNumber.Id = existingPhoneNumber.Id;
-            mappedNumber.Notified = existingPhoneNumber.Notified;
+            var updateData = new PhoneNumber();
 
-            if(methodType == MethodType.Create)
-                mappedNumber.Notified++;
+            updateData.Id = existingInDb.Id;
+            updateData.Prefix = existingInDb.Prefix;
+            updateData.Number = existingInDb.Number;
+            updateData.Notified = existingInDb.Notified;
+
+            if (methodType == MethodType.Create)
+                updateData.Notified++;
 
             if(methodType == MethodType.Delete)
-                mappedNumber.Notified--;
+                updateData.Notified--;
 
-            if(mappedNumber.Notified>20)
+            if(updateData.Notified>20)
             {
-                mappedNumber.IsBully = true;
+                updateData.IsBully = true;
             }
             else
             {
-                mappedNumber.IsBully = false;
+                updateData.IsBully = false;
             }
 
-            _blightDbContext.Entry(existingPhoneNumber)
+            _blightDbContext.Entry(existingInDb)
                 .CurrentValues
-                .SetValues(mappedNumber);
+                .SetValues(updateData);
 
-            activeUser.BlockedNumbers.Add(existingPhoneNumber);
             await _blightDbContext.SaveChangesAsync();
 
-            return mappedNumber;
+            return updateData;
+
+
+            // //////////////////////////////////////////////////
+
+
+
+            //if(methodType == MethodType.Create)
+            //{
+            //    activeUser.BlockedNumbers.Add(existingInDb);
+            //}
+            //if (methodType == MethodType.Delete)
+            //{
+            //    activeUser.BlockedNumbers.Remove(existingInDb);
+            //}
+
+            //await _blightDbContext.SaveChangesAsync();
+
+            //return updateData;
         }
 
         public async override Task Delete(int id)
@@ -107,8 +128,7 @@ namespace Blight.Repository
                     if (userNumber.Number == phoneNumber.Number)
                     {
                         activeUser.BlockedNumbers.Remove(phoneNumber);
-                       // var result = Update()
-                       
+                        var result = UpdateNotification(phoneNumber,)
                     }
                 }
 

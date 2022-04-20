@@ -30,6 +30,8 @@ namespace Blight.Mapper
 
             CreateMap<PhoneNumberDto, PhoneNumber>();
 
+            CreateMap<PhoneNumber, PhoneNumber>();
+
             CreateMap<LoginUserDto,User>()
                 .ForMember(d => d.Email, x => x.MapFrom(j => j.Email.ToLower()));
 
