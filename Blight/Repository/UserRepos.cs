@@ -45,7 +45,20 @@ namespace Blight.Repository
 
             string? hashedPassword = _passwordHasher.HashPassword(user, password);
             user.Password = hashedPassword;
-            return await base.Create(user);
+
+            var result = await _dbSet.AddAsync(user);
+
+            if (result.State != EntityState.Added)
+            {
+                throw new DataBaseException("Something went wrong");
+            }
+
+            await _blightDbContext.SaveChangesAsync();
+
+            return user;
+
+
+
         }
 
         public async Task<string> Login(IDto dto)
@@ -127,19 +140,49 @@ namespace Blight.Repository
             return result;
         }
 
-        public async override Task<User> GetById(int id)
+        public async override Task<IDto> GetById(int id)
         {
-            var result = await _dbSet
+            var user = await _dbSet
                     .Include(p => p.BlockedNumbers)
+                    .Include(r=>r.Role)
                     .FirstOrDefaultAsync(x => x.Id == id);
-            if (result is null)
+
+            if (user is null)
             {
-                throw new NotFoundException("Element not found");
+                throw new NotFoundException("User not found");
             }
+
+            var result = _mapper.Map<GetByIdUserModel>(user);
 
             return result;
 
         }
+
+        public async override Task Delete(int id)
+        {
+            var entity = await FindElement(x => x.Id == id);
+
+            var result = _dbSet.Remove(entity);
+
+            if (result.State != EntityState.Deleted)
+            {
+                throw new DataBaseException("Something went wrong");
+            }
+            await _blightDbContext.SaveChangesAsync();
+        }
+
+        public async override Task<IEnumerable<IDto>> GetAll(Expression<Func<User, bool>>? predicate)
+        {
+            var users = await base.GetAll(predicate);
+            var tempUsers = users as List<User>;
+
+            var result = _mapper.Map<IEnumerable<GetAllUserViewModel>>(tempUsers);
+            return result;
+
+        }
+
+
+
 
     }
 

@@ -10,10 +10,11 @@ using Microsoft.EntityFrameworkCore;
 using Blight.Exceptions;
 using Blight.Interfaces;
 using AutoMapper;
+using Blight.Models;
 
 namespace Blight.Repository
 {
-    public class PhoneRepos : GenericRepository<PhoneNumber>
+    public class PhoneRepos : GenericRepository<PhoneNumber>,IPhoneRepository
     {
         private readonly IMapper _mapper;
         private readonly IUserContextService _userContextService;
@@ -23,6 +24,53 @@ namespace Blight.Repository
             _mapper = mapper;
             _userContextService = userContextService;
         }
+
+        public async override Task<IEnumerable<IDto>> GetAll(Expression<Func<PhoneNumber, bool>>? predicate)
+        {
+            List<PhoneNumber> listOfNumbers;
+
+            if (predicate is null)
+            {
+                listOfNumbers = await _dbSet
+                    .Include(x=>x.Users)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+            }
+            else
+            {
+                listOfNumbers = await _dbSet
+                    .Include(x => x.Users)
+                    .Where(predicate)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+            }
+
+            var mappedList = _mapper.Map<IEnumerable<PhoneNumberViewModel>>(listOfNumbers);
+            return mappedList;
+
+        }
+        public async Task<IEnumerable<IDto>> GetUserBlockedNumbers()
+        {
+            var activeUser = await _blightDbContext
+                    .Users
+                    .Include(n => n.BlockedNumbers)
+                    .SingleOrDefaultAsync(x => x.Id == _userContextService.GetUserId);
+
+            var blockedNumbers = activeUser.BlockedNumbers;
+            var mappedNumbers = _mapper.Map<List<PhoneNumberViewModel>>(blockedNumbers);
+
+            return mappedNumbers;
+        }
+
+        public async override Task<PhoneNumber> FindElement(Expression<Func<PhoneNumber, bool>> predicate)
+        {
+            var result = await _dbSet.FirstOrDefaultAsync(predicate);
+
+            return result;
+        }
+
         public override async Task<PhoneNumber> Create(IDto dto)
         {
             var phoneNumber = _mapper.Map<PhoneNumber>(dto);
@@ -46,71 +94,21 @@ namespace Blight.Repository
                 }
             }
 
-            if (existingPhoneNumber is null)
-            {
                 userNumberList.Add(phoneNumber);
                 await _blightDbContext.SaveChangesAsync();
                 phoneNumber.Users = null;
+
                 return phoneNumber;
-            }
 
-            var updatedNumber = UpdatePhoneNumberNotification(existingPhoneNumber,MethodType.Create);
-        }
-
-        private async Task<PhoneNumber> UpdatePhoneNumberNotification(PhoneNumber existingInDb,MethodType methodType)
-        {
-            var updateData = new PhoneNumber();
-
-            updateData.Id = existingInDb.Id;
-            updateData.Prefix = existingInDb.Prefix;
-            updateData.Number = existingInDb.Number;
-            updateData.Notified = existingInDb.Notified;
-
-            if (methodType == MethodType.Create)
-                updateData.Notified++;
-
-            if(methodType == MethodType.Delete)
-                updateData.Notified--;
-
-            if(updateData.Notified>20)
-            {
-                updateData.IsBully = true;
-            }
-            else
-            {
-                updateData.IsBully = false;
-            }
-
-            _blightDbContext.Entry(existingInDb)
-                .CurrentValues
-                .SetValues(updateData);
-
-            await _blightDbContext.SaveChangesAsync();
-
-            return updateData;
-
-
-            // //////////////////////////////////////////////////
-
-
-
-            //if(methodType == MethodType.Create)
-            //{
-            //    activeUser.BlockedNumbers.Add(existingInDb);
-            //}
-            //if (methodType == MethodType.Delete)
-            //{
-            //    activeUser.BlockedNumbers.Remove(existingInDb);
-            //}
-
-            //await _blightDbContext.SaveChangesAsync();
-
-            //return updateData;
         }
 
         public async override Task Delete(int id)
         {
-            var phoneNumber = await GetById(id);
+            var phoneNumber = await _dbSet.FirstOrDefaultAsync(i =>i.Id == id) as PhoneNumber;
+            if(phoneNumber is null)
+            {
+                throw new NotFoundException("Number not found");
+            }
 
             var activeUser = await _blightDbContext
                     .Users
@@ -128,13 +126,32 @@ namespace Blight.Repository
                     if (userNumber.Number == phoneNumber.Number)
                     {
                         activeUser.BlockedNumbers.Remove(phoneNumber);
-                        var result = UpdateNotification(phoneNumber,)
                     }
                 }
-
+            }
+            if(userRole ==2)
+            {
+                _dbSet.Remove(phoneNumber);
             }
 
         }
+
+        public async override Task<IDto> GetById(int id)
+        {
+            var element = await _dbSet
+                .Include(x=>x.Users)
+                .FirstOrDefaultAsync(i=>i.Id == id);
+
+            if (element is null)
+            {
+                throw new NotFoundException("Number not found");
+            }
+
+            var result = _mapper.Map<PhoneNumberViewModel>(element);
+
+            return result;
+        }
+
 
         private enum MethodType
         {

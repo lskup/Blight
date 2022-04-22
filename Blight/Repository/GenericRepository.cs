@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Blight.Repository
 {
-    public class GenericRepository<T> : IGenericRepository<T> where T : class
+    public class GenericRepository<T> : IGenericRepository<T> where T : class,IDto
     {
         protected readonly BlightDbContext _blightDbContext;
         internal DbSet<T> _dbSet;
@@ -46,7 +46,7 @@ namespace Blight.Repository
 
         public virtual async Task Delete(int id)
         {
-            var entity = await GetById(id);
+            var entity = await GetById(id) as T;
 
             var result = _dbSet.Remove(entity);
 
@@ -64,7 +64,7 @@ namespace Blight.Repository
             return result;
         }
 
-        public virtual async Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? predicate)
+        public virtual async Task<IEnumerable<IDto>> GetAll(Expression<Func<T, bool>>? predicate)
         {
             if (predicate is null)
             {
@@ -79,7 +79,7 @@ namespace Blight.Repository
                 .ToListAsync();
         }
 
-        public virtual async Task<T> GetById(int id)
+        public virtual async Task<IDto> GetById(int id)
         {
             var result = await _dbSet.FindAsync(id);
             if (result is null)
