@@ -18,14 +18,13 @@ namespace Blight.Controllers
 
     public class PhoneNumbersController : ControllerBase
     {
-        private readonly IGenericRepository<PhoneNumber> _phoneNumberRepos2;
+        private readonly IPhoneRepository _phoneNumberRepos2;
 
-        public PhoneNumbersController(IGenericRepository<PhoneNumber> phoneNumberRepos2)
+        public PhoneNumbersController(IPhoneRepository phoneNumberRepos2)
         {
             _phoneNumberRepos2 = phoneNumberRepos2;
         }
 
-        // GET: api/<UsersController>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PhoneNumber>>> GetAll(bool onlyBullyNumbers)
         {
@@ -36,7 +35,14 @@ namespace Blight.Controllers
             return Ok(await _phoneNumberRepos2.GetAll());
         }
 
-        // GET api/<UsersController>/5
+        [HttpGet]
+        [Route("getBlockedNumbers")]
+        public async Task<ActionResult<IEnumerable<PhoneNumber>>> GetUserBlockedNumbers()
+        {
+            return Ok(await _phoneNumberRepos2.GetUserAllBlockedNumbers());
+        }
+
+
         [HttpGet("{id}")]
         public async Task<ActionResult<PhoneNumberDto>> Get(int id)
         {
@@ -45,7 +51,6 @@ namespace Blight.Controllers
             return Ok(result);
         }
 
-        // POST api/<UsersController>
         [HttpPost]
         public async Task<ActionResult<PhoneNumber>> Post([FromBody] PhoneNumberDto dto)
         {
@@ -58,7 +63,6 @@ namespace Blight.Controllers
 
         }
 
-        // DELETE api/<UsersController>/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

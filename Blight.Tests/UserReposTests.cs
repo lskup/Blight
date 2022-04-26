@@ -35,14 +35,14 @@ namespace Blight.Tests
         };
 
         [Fact]
-        public async Task GetAll_PredicateIsNull_AllUsers()
+        public async Task GetAll_PredicateIsNull_ListGetAllUserViewModel()
         {
             //Arrange  
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
-            UserRepos userRepos = new UserRepos(_dbContext, null, null,null);
+            UserRepos userRepos = new UserRepos(_dbContext, null, null,null,null);
 
             //Act  
-            var users = await userRepos.GetAll(null);
+            var users = await userRepos.GetAll(null) as List<GetAllUserViewModel> ;
 
             //Assert  
             Assert.NotNull(users);
@@ -56,7 +56,7 @@ namespace Blight.Tests
         {
             //Arrange  
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
-            UserRepos userRepos = new UserRepos(_dbContext, null, null,null);
+            UserRepos userRepos = new UserRepos(_dbContext, null, null,null,null);
 
             //Act  
             var users = await userRepos.GetAll(predicate);
@@ -69,14 +69,14 @@ namespace Blight.Tests
         [Theory]
         [InlineData(1)]
         [InlineData(2)]
-        public async Task GetById_ExistingId_User(int id)
+        public async Task GetById_ExistingId_GetByIdUserViewModel(int id)
         {
             // Arrange
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
-            UserRepos userRepos = new UserRepos(_dbContext, null, null,null);
+            UserRepos userRepos = new UserRepos(_dbContext, null, null,null,null);
 
             // Act
-            var user = await userRepos.GetById(id);
+            var user = await userRepos.GetById(id) as GetByIdUserViewModel;
 
             // Assert
             Assert.NotNull(user);
@@ -90,7 +90,7 @@ namespace Blight.Tests
         {
             // Arrange
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
-            UserRepos userRepos = new UserRepos(_dbContext, null, null,null);
+            UserRepos userRepos = new UserRepos(_dbContext, null, null,null,null);
 
             // Act
             var action = async () => await userRepos.GetById(id);
@@ -120,7 +120,7 @@ namespace Blight.Tests
             });
             hasher.SetReturnsDefault<string>("sd33454cecreds");
 
-            UserRepos userRepos = new UserRepos(_dbContext, mapper.Object,hasher.Object,null);
+            UserRepos userRepos = new UserRepos(_dbContext, mapper.Object,hasher.Object,null,null);
 
             // Act
             var user = await userRepos.Create(null);
@@ -152,7 +152,7 @@ namespace Blight.Tests
             });
             hasher.SetReturnsDefault<string>("sd33454cecreds3df");
 
-            UserRepos userRepos = new UserRepos(_dbContext, mapper.Object, hasher.Object, null);
+            UserRepos userRepos = new UserRepos(_dbContext, mapper.Object, hasher.Object, null,null);
 
             // Act
             var user = await userRepos.Create(null);
@@ -188,7 +188,7 @@ namespace Blight.Tests
                 LastName = "Tester",
                 Nationality = "Germany"
             };
-            UserRepos userRepos = new UserRepos(_dbContext, null,null,null);
+            UserRepos userRepos = new UserRepos(_dbContext, null,null,null,null);
 
             // Act
             var updatedUser = await userRepos.Update(1,userDto);
@@ -210,7 +210,7 @@ namespace Blight.Tests
                 LastName = "Tester",
                 Nationality = "Germany"
             };
-            UserRepos userRepos = new UserRepos(_dbContext, null, null,null);
+            UserRepos userRepos = new UserRepos(_dbContext, null, null,null,null);
 
             // Act
             var action =async() => await userRepos.Update(10, userDto);

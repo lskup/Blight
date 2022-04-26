@@ -13,5 +13,6 @@ namespace Blight.Interfaces
     {
         Task<string> Login(IDto dto);
 
+        Task<string> BanUser_Change(int id);
     }
 }

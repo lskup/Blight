@@ -9,6 +9,6 @@ namespace Blight.Interfaces
 {
     public interface IPhoneRepository:IGenericRepository<PhoneNumber>
     {
-        Task<IEnumerable<IDto>> GetUserBlockedNumbers();
+        Task<IEnumerable<IDto>> GetUserAllBlockedNumbers();
     }
 }

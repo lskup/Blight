@@ -28,6 +28,7 @@ namespace Blight.Authentication
                 new Claim(ClaimTypes.Name, $"{existingUser.FirstName} {existingUser.LastName}"),
                 new Claim(ClaimTypes.Role, $"{existingUser.Role.Name}"),
                 new Claim("DateOfBirth", existingUser.DateOfBirth.ToShortDateString()),
+                //new Claim("Banned",existingUser.Banned.ToString()),
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authenticationSettings.JwtKey));

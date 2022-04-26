@@ -19,6 +19,13 @@ namespace Blight.Entieties
         public virtual ICollection<PhoneNumber> BlockedNumbers { get; set; }
         public int RoleId { get; set; } = 1;
         public Role Role { get; set; }
+        public bool Banned { get; set; }
+
+        public override string ToString()
+        {
+            return Email;
+        }
+
 
     }
 }

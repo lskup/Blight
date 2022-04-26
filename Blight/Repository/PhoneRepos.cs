@@ -19,11 +19,17 @@ namespace Blight.Repository
         private readonly IMapper _mapper;
         private readonly IUserContextService _userContextService;
 
+
         public PhoneRepos(BlightDbContext blightDbContext, IMapper mapper, IUserContextService userContextService) : base(blightDbContext, mapper)
         {
             _mapper = mapper;
             _userContextService = userContextService;
         }
+        private User? activeUser => _blightDbContext
+                            .Users
+                            .Include(n => n.BlockedNumbers)
+                            .Include(n => n.Role)
+                            .SingleOrDefault(x => x.Id == _userContextService.GetUserId);
 
         public async override Task<IEnumerable<IDto>> GetAll(Expression<Func<PhoneNumber, bool>>? predicate)
         {
@@ -47,17 +53,17 @@ namespace Blight.Repository
 
             }
 
+            if(activeUser.RoleId==2)
+            {
+                return _mapper.Map<IEnumerable<AdminPhoneNumberViewModel>>(listOfNumbers); ;
+            }
+
             var mappedList = _mapper.Map<IEnumerable<PhoneNumberViewModel>>(listOfNumbers);
             return mappedList;
 
         }
-        public async Task<IEnumerable<IDto>> GetUserBlockedNumbers()
+        public async Task<IEnumerable<IDto>> GetUserAllBlockedNumbers()
         {
-            var activeUser = await _blightDbContext
-                    .Users
-                    .Include(n => n.BlockedNumbers)
-                    .SingleOrDefaultAsync(x => x.Id == _userContextService.GetUserId);
-
             var blockedNumbers = activeUser.BlockedNumbers;
             var mappedNumbers = _mapper.Map<List<PhoneNumberViewModel>>(blockedNumbers);
 
@@ -66,23 +72,26 @@ namespace Blight.Repository
 
         public async override Task<PhoneNumber> FindElement(Expression<Func<PhoneNumber, bool>> predicate)
         {
-            var result = await _dbSet.FirstOrDefaultAsync(predicate);
+            var result = await _dbSet
+                    .Include(x => x.Users)
+                    .FirstOrDefaultAsync(predicate);
+                    
 
             return result;
         }
 
         public override async Task<PhoneNumber> Create(IDto dto)
         {
+            if(activeUser.Banned == true)
+            {
+                throw new ForbiddenException("You are banned, contact with administration");
+            }
+
             var phoneNumber = _mapper.Map<PhoneNumber>(dto);
 
             var existingPhoneNumber = await FindElement
                 (e => e.Number == phoneNumber.Number &&
                  e.Prefix == phoneNumber.Prefix);
-
-            var activeUser = await _blightDbContext
-                    .Users
-                    .Include(n=>n.BlockedNumbers)
-                    .SingleOrDefaultAsync(x => x.Id == _userContextService.GetUserId);
 
             var userNumberList = activeUser.BlockedNumbers;
 
@@ -94,11 +103,20 @@ namespace Blight.Repository
                 }
             }
 
-                userNumberList.Add(phoneNumber);
-                await _blightDbContext.SaveChangesAsync();
-                phoneNumber.Users = null;
+            if(existingPhoneNumber is null)
+            {
+                phoneNumber.Users.Add(activeUser);
+            }
+            else
+            {
+                existingPhoneNumber.Users.Add(activeUser);
+            }
 
-                return phoneNumber;
+            await _blightDbContext.SaveChangesAsync();
+
+            phoneNumber.Users = new List<User>();
+            
+            return phoneNumber;
 
         }
 
@@ -109,11 +127,6 @@ namespace Blight.Repository
             {
                 throw new NotFoundException("Number not found");
             }
-
-            var activeUser = await _blightDbContext
-                    .Users
-                    .Include(n => n.BlockedNumbers)
-                    .SingleOrDefaultAsync(x => x.Id == _userContextService.GetUserId);
 
             var userRole = activeUser.RoleId;
 
@@ -133,7 +146,7 @@ namespace Blight.Repository
             {
                 _dbSet.Remove(phoneNumber);
             }
-
+            await _blightDbContext.SaveChangesAsync();
         }
 
         public async override Task<IDto> GetById(int id)
@@ -147,16 +160,13 @@ namespace Blight.Repository
                 throw new NotFoundException("Number not found");
             }
 
+            if(activeUser.RoleId ==2)
+            {
+                return _mapper.Map<AdminPhoneNumberViewModel>(element); ;
+            }
             var result = _mapper.Map<PhoneNumberViewModel>(element);
 
             return result;
-        }
-
-
-        private enum MethodType
-        {
-            Create,
-            Delete
         }
 
 

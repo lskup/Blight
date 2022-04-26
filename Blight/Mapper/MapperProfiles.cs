@@ -23,16 +23,20 @@ namespace Blight.Mapper
 
 
             CreateMap<User, GetAllUserViewModel>();
-            CreateMap<User, GetByIdUserModel>();
+            CreateMap<User, GetByIdUserViewModel>();
 
 
             CreateMap<UpdateUserDto, User>();
 
             CreateMap<PhoneNumber, PhoneNumberDto>();
 
-            CreateMap<PhoneNumberDto, PhoneNumber>();
+            CreateMap<PhoneNumberDto, PhoneNumber>()
+                .ForMember(x => x.Users, m => m.MapFrom(x => new List<User>()));
+               
 
             CreateMap<PhoneNumber, PhoneNumberViewModel>();
+            CreateMap<PhoneNumber, AdminPhoneNumberViewModel>();
+
             CreateMap<Role, RoleViewModel>();
 
 

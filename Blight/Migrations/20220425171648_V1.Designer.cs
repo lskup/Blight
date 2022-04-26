@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Blight.Migrations
 {
     [DbContext(typeof(BlightDbContext))]
-    [Migration("20220414094518_Create_V1")]
-    partial class Create_V1
+    [Migration("20220425171648_V1")]
+    partial class V1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -28,12 +28,6 @@ namespace Blight.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<bool>("IsBully")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("Notified")
-                        .HasColumnType("int");
-
                     b.Property<string>("Number")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -42,12 +36,7 @@ namespace Blight.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("PhoneNumbers");
                 });
@@ -120,11 +109,19 @@ namespace Blight.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Blight.Entieties.PhoneNumber", b =>
+            modelBuilder.Entity("PhoneNumberUser", b =>
                 {
-                    b.HasOne("Blight.Entieties.User", null)
-                        .WithMany("BlockedNumbers")
-                        .HasForeignKey("UserId");
+                    b.Property<int>("BlockedNumbersId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UsersId")
+                        .HasColumnType("int");
+
+                    b.HasKey("BlockedNumbersId", "UsersId");
+
+                    b.HasIndex("UsersId");
+
+                    b.ToTable("PhoneNumberUser");
                 });
 
             modelBuilder.Entity("Blight.Entieties.User", b =>
@@ -138,9 +135,19 @@ namespace Blight.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("Blight.Entieties.User", b =>
+            modelBuilder.Entity("PhoneNumberUser", b =>
                 {
-                    b.Navigation("BlockedNumbers");
+                    b.HasOne("Blight.Entieties.PhoneNumber", null)
+                        .WithMany()
+                        .HasForeignKey("BlockedNumbersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Blight.Entieties.User", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

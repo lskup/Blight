@@ -38,8 +38,8 @@ namespace Blight.Tests
                             {
                                 Prefix = "48",
                                 Number = "123456789",
-                                IsBully = false,
-                                Notified = 1
+                                //IsBully = false,
+                                //Notified = 1
                             });
 
                         context.SaveChanges();

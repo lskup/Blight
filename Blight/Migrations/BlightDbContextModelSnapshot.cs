@@ -26,12 +26,6 @@ namespace Blight.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<bool>("IsBully")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("Notified")
-                        .HasColumnType("int");
-
                     b.Property<string>("Number")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -79,6 +73,9 @@ namespace Blight.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("Banned")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("datetime2");

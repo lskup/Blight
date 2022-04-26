@@ -24,14 +24,22 @@ namespace Blight.Repository
         private readonly IMapper _mapper;
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly ISchemeGenerator _schemeGenerator;
+        private readonly IUserContextService _userContextService;
 
-        public UserRepos(BlightDbContext blightDbContext, IMapper mapper, IPasswordHasher<User> passwordHasher, ISchemeGenerator schemeGenerator)
+
+        public UserRepos(BlightDbContext blightDbContext, IMapper mapper, IPasswordHasher<User> passwordHasher, ISchemeGenerator schemeGenerator, IUserContextService userContextService)
             : base(blightDbContext, mapper)
         {
             _mapper = mapper;
             _passwordHasher = passwordHasher;
             _schemeGenerator = schemeGenerator;
+            _userContextService = userContextService;
         }
+        private User? activeUser => _blightDbContext
+                    .Users
+                    .Include(n => n.BlockedNumbers)
+                    .Include(n => n.Role)
+                    .SingleOrDefault(x => x.Id == _userContextService.GetUserId);
 
         public override async Task<User> Create(IDto dto)
         {
@@ -56,8 +64,6 @@ namespace Blight.Repository
             await _blightDbContext.SaveChangesAsync();
 
             return user;
-
-
 
         }
 
@@ -87,6 +93,10 @@ namespace Blight.Repository
 
         public override async Task<User> Update(int id, IDto dto)
         {
+            if(id!=activeUser.Id)
+            {
+                new ForbiddenException("You have not authority for this action");
+            }
 
             var user = dto;
 
@@ -142,6 +152,14 @@ namespace Blight.Repository
 
         public async override Task<IDto> GetById(int id)
         {
+            if(activeUser.RoleId ==1)
+            {
+                if(activeUser.Id != id)
+                {
+                    throw new ForbiddenException("Action forbidden");
+                }
+            }
+
             var user = await _dbSet
                     .Include(p => p.BlockedNumbers)
                     .Include(r=>r.Role)
@@ -152,7 +170,7 @@ namespace Blight.Repository
                 throw new NotFoundException("User not found");
             }
 
-            var result = _mapper.Map<GetByIdUserModel>(user);
+            var result = _mapper.Map<GetByIdUserViewModel>(user);
 
             return result;
 
@@ -160,6 +178,11 @@ namespace Blight.Repository
 
         public async override Task Delete(int id)
         {
+            if (id != activeUser.Id)
+            {
+                new ForbiddenException("You have not authority for this action");
+            }
+
             var entity = await FindElement(x => x.Id == id);
 
             var result = _dbSet.Remove(entity);
@@ -181,9 +204,18 @@ namespace Blight.Repository
 
         }
 
+        public async Task<string> BanUser_Change(int id)
+        {
+            var user =await FindElement(x=>x.Id == id);
+            var userStatus = user.Banned;
 
+            var newUserStatus = !userStatus;
+            user.Banned = newUserStatus;
 
+            string result = $"User {user.ToString()} " + String.Format("{0}",newUserStatus?"banned":"unbanned");
 
+            return result;
+        }
     }
 
 }

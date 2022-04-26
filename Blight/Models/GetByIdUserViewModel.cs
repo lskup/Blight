@@ -9,7 +9,7 @@ using Blight.Models;
 
 namespace Blight.Models
 {
-    public class GetByIdUserModel:IDto
+    public class GetByIdUserViewModel:IDto
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }

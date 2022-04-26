@@ -45,9 +45,10 @@ namespace Blight.Tests
                     {
                         Prefix = $"4{i}",
                         Number = "123456789",
-                        Notified = 18 + i,
-                        IsBully = i>20? true:false,
-                        Users = new List<User>(),
+                        Users = new List<User>()
+                        {
+                            databaseContext.Users.Find(i)
+                        }
 
                     }); 
                     await databaseContext.SaveChangesAsync();

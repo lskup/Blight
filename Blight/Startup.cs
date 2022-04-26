@@ -105,7 +105,7 @@ namespace Blight
             services.AddScoped<IValidator<RegisterUserDto>, RegisterUserDtoValidator>();
             services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
             services.AddScoped<IUserRepository, UserRepos>();
-            services.AddScoped<IGenericRepository<PhoneNumber>, PhoneRepos>();
+            services.AddScoped<IPhoneRepository, PhoneRepos>();
             services.AddScoped<ISchemeGenerator, SchemesGenerator>();
             services.AddScoped<IUserContextService, UserContextService>();
             services.AddHttpContextAccessor();

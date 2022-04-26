@@ -33,6 +33,7 @@ namespace Blight.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "User,Admin")]
         public async Task<ActionResult<User>> Get(int id)
         {
             var result = await _userRepos.GetById(id);
@@ -69,6 +70,16 @@ namespace Blight.Controllers
 
             return NoContent();
         }
+
+        [HttpPost("ban/{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<User>> UserBanStatus_Change(int id)
+        {
+            var result = await _userRepos.BanUser_Change(id);
+
+            return Ok(result);
+        }
+
 
         [HttpPost("login")]
         [AllowAnonymous]

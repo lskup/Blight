@@ -3,10 +3,24 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Blight.Migrations
 {
-    public partial class Create_V1 : Migration
+    public partial class V1 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "PhoneNumbers",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Prefix = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Number = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PhoneNumbers", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Roles",
                 columns: table => new
@@ -46,26 +60,27 @@ namespace Blight.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PhoneNumbers",
+                name: "PhoneNumberUser",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Prefix = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Number = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Notified = table.Column<int>(type: "int", nullable: false),
-                    IsBully = table.Column<bool>(type: "bit", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: true)
+                    BlockedNumbersId = table.Column<int>(type: "int", nullable: false),
+                    UsersId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PhoneNumbers", x => x.Id);
+                    table.PrimaryKey("PK_PhoneNumberUser", x => new { x.BlockedNumbersId, x.UsersId });
                     table.ForeignKey(
-                        name: "FK_PhoneNumbers_Users_UserId",
-                        column: x => x.UserId,
+                        name: "FK_PhoneNumberUser_PhoneNumbers_BlockedNumbersId",
+                        column: x => x.BlockedNumbersId,
+                        principalTable: "PhoneNumbers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PhoneNumberUser_Users_UsersId",
+                        column: x => x.UsersId,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(
@@ -79,9 +94,9 @@ namespace Blight.Migrations
                 values: new object[] { 2, "Admin" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_PhoneNumbers_UserId",
-                table: "PhoneNumbers",
-                column: "UserId");
+                name: "IX_PhoneNumberUser_UsersId",
+                table: "PhoneNumberUser",
+                column: "UsersId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_RoleId",
@@ -91,6 +106,9 @@ namespace Blight.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "PhoneNumberUser");
+
             migrationBuilder.DropTable(
                 name: "PhoneNumbers");
 
