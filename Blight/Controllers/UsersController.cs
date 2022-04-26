@@ -15,7 +15,6 @@ namespace Blight.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles ="Admin")]
 
     public class UsersController : ControllerBase
     {
@@ -27,6 +26,7 @@ namespace Blight.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<User>>> GetAll()
         {
             return Ok(await _userRepos.GetAll());
