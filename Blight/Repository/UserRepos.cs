@@ -35,11 +35,15 @@ namespace Blight.Repository
             _schemeGenerator = schemeGenerator;
             _userContextService = userContextService;
         }
-        private User? activeUser => _blightDbContext
+        private User? findActiveUser => _blightDbContext
                     .Users
                     .Include(n => n.BlockedNumbers)
                     .Include(n => n.Role)
                     .SingleOrDefault(x => x.Id == _userContextService.GetUserId);
+
+        private User? activeUser => findActiveUser is null ?
+            throw new ForbiddenException("You have not authority for this action") :
+            findActiveUser;
 
         public override async Task<User> Create(IDto dto)
         {
@@ -95,7 +99,7 @@ namespace Blight.Repository
         {
             if(id!=activeUser.Id)
             {
-                new ForbiddenException("You have not authority for this action");
+                throw new ForbiddenException("You have not authority for this action");
             }
 
             var user = dto;
@@ -126,7 +130,6 @@ namespace Blight.Repository
                         {
                             existingUserProperties[i].SetValue(existingUser, propertyValue);
                         }
-
                     }
                 }
             }
@@ -180,7 +183,7 @@ namespace Blight.Repository
         {
             if (id != activeUser.Id)
             {
-                new ForbiddenException("You have not authority for this action");
+                throw new ForbiddenException("You have not authority for this action");
             }
 
             var entity = await FindElement(x => x.Id == id);

@@ -99,7 +99,7 @@ namespace Blight
                 });
             });
             services.AddDbContext<BlightDbContext>(cfg =>
-            cfg.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+                cfg.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddAutoMapper(typeof(Startup));
             services.AddScoped<ErrorHandlingMiddleware>();
             services.AddScoped<IValidator<RegisterUserDto>, RegisterUserDtoValidator>();

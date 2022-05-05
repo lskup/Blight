@@ -83,7 +83,8 @@ namespace Blight.Tests
             stubbedMapper.SetReturnsDefault(new PhoneNumber()
             {
                 Prefix = "48",
-                Number = "987654321"
+                Number = "987654321",
+                Users = new List<User>(),
             });
 
             stubbedUser.Setup(x => x.GetUserId)
@@ -97,8 +98,6 @@ namespace Blight.Tests
             // Assert
             Assert.NotNull(result);
             Assert.Equal("987654321", result.Number);
-            Assert.Equal(4, _dbContext.PhoneNumbers.Count());
-
         }
 
         [Fact]
@@ -124,6 +123,31 @@ namespace Blight.Tests
             // Assert
             var caughtException = Assert.ThrowsAsync<ForbiddenException>(action);
             Assert.Equal("You already block this number", caughtException.Result.Message);
+        }
+
+        [Fact]
+        public async Task Create_UserBanned_ForbiddenException()
+        {
+            // Arrange
+            var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
+            var mapper = new Mock<IMapper>();
+            var stubbedUser = new Mock<IUserContextService>();
+
+
+            var existingNumber = _dbContext.PhoneNumbers.First();
+
+            mapper.SetReturnsDefault(existingNumber);
+            stubbedUser.Setup(x => x.GetUserId)
+                       .Returns(2);
+
+            PhoneRepos phoneRepos = new PhoneRepos(_dbContext, mapper.Object, stubbedUser.Object);
+
+            // Act
+            var action = async () => await phoneRepos.Create(null);
+
+            // Assert
+            var caughtException = Assert.ThrowsAsync<ForbiddenException>(action);
+            Assert.Equal("You are banned, contact with administration", caughtException.Result.Message);
         }
 
 

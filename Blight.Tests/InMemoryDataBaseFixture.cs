@@ -39,6 +39,7 @@ namespace Blight.Tests
                         Password = "sad325sadcd5fds5d5",
                         RoleId = i % 2 == 1 ? 1 : 2,
                         BlockedNumbers = new List<PhoneNumber>(),
+                        Banned = i%2==0?true:false,
 
                     });
                     await databaseContext.PhoneNumbers.AddAsync(new PhoneNumber()

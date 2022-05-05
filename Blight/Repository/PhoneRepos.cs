@@ -25,42 +25,42 @@ namespace Blight.Repository
             _mapper = mapper;
             _userContextService = userContextService;
         }
-        private User? activeUser => _blightDbContext
-                            .Users
-                            .Include(n => n.BlockedNumbers)
-                            .Include(n => n.Role)
-                            .SingleOrDefault(x => x.Id == _userContextService.GetUserId);
+        private User? findActiveUser => _blightDbContext
+                    .Users
+                    .Include(n => n.BlockedNumbers)
+                    .Include(n => n.Role)
+                    .SingleOrDefault(x => x.Id == _userContextService.GetUserId);
+
+        private User? activeUser => findActiveUser is null ?
+            throw new ForbiddenException("You have not authority for this action") :
+            findActiveUser;
 
         public async override Task<IEnumerable<IDto>> GetAll(Expression<Func<PhoneNumber, bool>>? predicate)
         {
             List<PhoneNumber> listOfNumbers;
+            IEnumerable<PhoneNumber> result;
 
-            if (predicate is null)
+            listOfNumbers = await _dbSet
+                .Include(x=>x.Users)
+                .AsNoTracking()
+                .ToListAsync();
+
+            if(predicate is not null)
             {
-                listOfNumbers = await _dbSet
-                    .Include(x=>x.Users)
-                    .AsNoTracking()
-                    .ToListAsync();
-
+                result = listOfNumbers.Where(predicate.Compile());
             }
             else
             {
-                listOfNumbers = await _dbSet
-                    .Include(x => x.Users)
-                    .Where(predicate)
-                    .AsNoTracking()
-                    .ToListAsync();
-
+                result = listOfNumbers;
             }
 
             if(activeUser.RoleId==2)
             {
-                return _mapper.Map<IEnumerable<AdminPhoneNumberViewModel>>(listOfNumbers); ;
+                return _mapper.Map<IEnumerable<AdminPhoneNumberViewModel>>(result); ;
             }
 
-            var mappedList = _mapper.Map<IEnumerable<PhoneNumberViewModel>>(listOfNumbers);
+            var mappedList = _mapper.Map<IEnumerable<PhoneNumberViewModel>>(result);
             return mappedList;
-
         }
         public async Task<IEnumerable<IDto>> GetUserAllBlockedNumbers()
         {
@@ -75,7 +75,6 @@ namespace Blight.Repository
             var result = await _dbSet
                     .Include(x => x.Users)
                     .FirstOrDefaultAsync(predicate);
-                    
 
             return result;
         }
@@ -168,7 +167,5 @@ namespace Blight.Repository
 
             return result;
         }
-
-
     }
 }

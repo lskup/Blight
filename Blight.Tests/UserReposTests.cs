@@ -26,6 +26,7 @@ namespace Blight.Tests
 
         public Mock<IGenericRepository<User>> mock = new Mock<IGenericRepository<User>>();
 
+        //Purpose - passing predicate as test method parameter|==>[MemberData(nameof(predicates_GetAllMethod))]
         //Cel - mo¿liwoœæ przekazania predykaty jako parametr testu |==>[MemberData(nameof(predicates_GetAllMethod))]
         public static TheoryData<Expression<Func<User, bool>>> predicates_GetAllMethod = new TheoryData<Expression<Func<User, bool>>>()
         {
@@ -34,70 +35,75 @@ namespace Blight.Tests
             {k=>k.FirstName=="testName1" },
         };
 
-        [Fact]
-        public async Task GetAll_PredicateIsNull_ListGetAllUserViewModel()
-        {
-            //Arrange  
-            var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
-            UserRepos userRepos = new UserRepos(_dbContext, null, null,null,null);
+        //[Fact]
+        //public async Task GetAll_PredicateIsNull_ListGetAllUserViewModel()
+        //{
+        //    //Arrange  
+        //    var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
+        //    UserRepos userRepos = new UserRepos(_dbContext, null, null,null,null);
 
-            //Act  
-            var users = await userRepos.GetAll(null) as List<GetAllUserViewModel> ;
+        //    //Act  
+        //    var users = await userRepos.GetAll(null) as List<GetAllUserViewModel> ;
 
-            //Assert  
-            Assert.NotNull(users);
-            Assert.Equal(3, users.Count());
-            Assert.Equal("testName1", users.First().FirstName);
-        }
+        //    //Assert  
+        //    Assert.NotNull(users);
+        //    Assert.Equal(3, users.Count());
+        //    Assert.Equal("testName1", users.First().FirstName);
+        //}
+
+        //[Theory]
+        //[MemberData(nameof(predicates_GetAllMethod))]
+        //public async Task GetAll_RandomPredicate_ListOfUsers(Expression<Func<User, bool>>? predicate)
+        //{
+        //    //Arrange  
+        //    var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
+        //    UserRepos userRepos = new UserRepos(_dbContext, null, null,null,null);
+
+        //    //Act  
+        //    var users = await userRepos.GetAll(predicate);
+
+        //    //Assert  
+        //    Assert.NotNull(users);
+        //    Assert.IsType(typeof(List<User>), users);
+        //}
+
+        //[Theory]
+        //[InlineData(1)]
+        //[InlineData(2)]
+        //public async Task GetById_ExistingId_GetByIdUserViewModel(int id)
+        //{
+        //    // Arrange
+        //    var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
+        //    UserRepos userRepos = new UserRepos(_dbContext, null, null,null,null);
+
+        //    // Act
+        //    var user = await userRepos.GetById(id) as GetByIdUserViewModel;
+
+        //    // Assert
+        //    Assert.NotNull(user);
+        //    Assert.Equal($"testName{id}", user.FirstName);
+        //}
 
         [Theory]
-        [MemberData(nameof(predicates_GetAllMethod))]
-        public async Task GetAll_RandomPredicate_ListOfUsers(Expression<Func<User, bool>>? predicate)
-        {
-            //Arrange  
-            var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
-            UserRepos userRepos = new UserRepos(_dbContext, null, null,null,null);
-
-            //Act  
-            var users = await userRepos.GetAll(predicate);
-
-            //Assert  
-            Assert.NotNull(users);
-            Assert.IsType(typeof(List<User>), users);
-        }
-
-        [Theory]
-        [InlineData(1)]
         [InlineData(2)]
-        public async Task GetById_ExistingId_GetByIdUserViewModel(int id)
+        public async Task GetById_OtherUser_ThrowForbiddenException(int id)
         {
             // Arrange
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
-            UserRepos userRepos = new UserRepos(_dbContext, null, null,null,null);
+            var stubbedUser = new Mock<IUserContextService>();
 
-            // Act
-            var user = await userRepos.GetById(id) as GetByIdUserViewModel;
 
-            // Assert
-            Assert.NotNull(user);
-            Assert.Equal($"testName{id}", user.FirstName);
-        }
+            stubbedUser.Setup(x => x.GetUserId)
+                       .Returns(1);
 
-        [Theory]
-        [InlineData(6)]
-        [InlineData(12)]
-        public async Task GetById_NotExistId_NotFoundException(int id)
-        {
-            // Arrange
-            var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
-            UserRepos userRepos = new UserRepos(_dbContext, null, null,null,null);
+            UserRepos userRepos = new UserRepos(_dbContext, null,null,null, stubbedUser.Object);
 
             // Act
             var action = async () => await userRepos.GetById(id);
 
             // Assert
-            var caughtException = Assert.ThrowsAsync<NotFoundException>(action);
-            Assert.Equal("Element not found", caughtException.Result.Message);
+            var caughtException = Assert.ThrowsAsync<ForbiddenException>(action);
+            Assert.Equal("Action forbidden", caughtException.Result.Message);
         }
 
         [Fact]
@@ -162,19 +168,26 @@ namespace Blight.Tests
             Assert.Equal(2, user.RoleId);
         }
 
-        [Fact]
-        public async Task Delete_ExistedId_DbElementsNumber()
+        [Theory]
+        [InlineData(2)]
+        public async Task Delete_OtherUser_ThrowForbiddenException(int id)
         {
             // Arrange
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
+            var stubbedUser = new Mock<IUserContextService>();
 
-            GenericRepository<User> userRepos = new GenericRepository<User>(_dbContext,null);
+
+            stubbedUser.Setup(x => x.GetUserId)
+                       .Returns(1);
+
+            UserRepos userRepos = new UserRepos(_dbContext, null, null, null, stubbedUser.Object);
 
             // Act
-            await userRepos.Delete(1);
+            var action = async () => await userRepos.Delete(id);
 
             // Assert
-            Assert.Equal(2, _dbContext.Users.Count());
+            var caughtException = Assert.ThrowsAsync<ForbiddenException>(action);
+            Assert.Equal("You have not authority for this action", caughtException.Result.Message);
         }
 
         [Fact]
@@ -182,13 +195,19 @@ namespace Blight.Tests
         {
             // Arrange
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
+            var stubbedUser = new Mock<IUserContextService>();
+
             var userDto = new UpdateUserDto()
             {
                 FirstName = "Martin",
                 LastName = "Tester",
                 Nationality = "Germany"
             };
-            UserRepos userRepos = new UserRepos(_dbContext, null,null,null,null);
+            stubbedUser.Setup(x => x.GetUserId)
+                       .Returns(1);
+
+
+            UserRepos userRepos = new UserRepos(_dbContext, null,null,null,stubbedUser.Object);
 
             // Act
             var updatedUser = await userRepos.Update(1,userDto);
@@ -200,24 +219,29 @@ namespace Blight.Tests
         }
 
         [Fact]
-        public async Task Update_NotExistingId_NotFoundException()
+        public async Task Update_OtherUser_ThrowForbiddenException()
         {
             // Arrange
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
+            var stubbedUser = new Mock<IUserContextService>();
+
             var userDto = new UpdateUserDto()
             {
                 FirstName = "Martin",
                 LastName = "Tester",
                 Nationality = "Germany"
             };
-            UserRepos userRepos = new UserRepos(_dbContext, null, null,null,null);
+            stubbedUser.Setup(x => x.GetUserId)
+                       .Returns(1);
+
+            UserRepos userRepos = new UserRepos(_dbContext, null, null,null,stubbedUser.Object);
 
             // Act
             var action =async() => await userRepos.Update(10, userDto);
 
             // Assert
-            var caughtException = Assert.ThrowsAsync<NotFoundException>(action);
-            Assert.Equal("User not found", caughtException.Result.Message);
+            var caughtException = Assert.ThrowsAsync<ForbiddenException>(action);
+            Assert.Equal("You have not authority for this action", caughtException.Result.Message);
         }
 
     }
