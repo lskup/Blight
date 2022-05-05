@@ -35,31 +35,28 @@ namespace Blight.Repository
             throw new ForbiddenException("You have not authority for this action") :
             findActiveUser;
 
-        public async override Task<IEnumerable<IDto>> GetAll(Expression<Func<PhoneNumber, bool>>? predicate)
+        public async override Task<IEnumerable<IDto>> GetAll(IPagination paginationPhoneQuery)
         {
+            var paginationPhoneObj = paginationPhoneQuery as PaginationPhoneQuery;
             List<PhoneNumber> listOfNumbers;
-            IEnumerable<PhoneNumber> result;
 
             listOfNumbers = await _dbSet
-                .Include(x=>x.Users)
+                .Include(x => x.Users)
                 .AsNoTracking()
+                .Where(x => paginationPhoneObj.onlyBlockedNumbers == false || x.IsBully == true)
                 .ToListAsync();
 
-            if(predicate is not null)
+            var paginatedList = listOfNumbers
+                .Skip(paginationPhoneObj.PageSize * (paginationPhoneObj.PageNumber - 1))
+                .Take(paginationPhoneObj.PageSize)
+                .ToList();
+
+            if (activeUser.RoleId==2)
             {
-                result = listOfNumbers.Where(predicate.Compile());
-            }
-            else
-            {
-                result = listOfNumbers;
+                return _mapper.Map<IEnumerable<AdminPhoneNumberViewModel>>(paginatedList); ;
             }
 
-            if(activeUser.RoleId==2)
-            {
-                return _mapper.Map<IEnumerable<AdminPhoneNumberViewModel>>(result); ;
-            }
-
-            var mappedList = _mapper.Map<IEnumerable<PhoneNumberViewModel>>(result);
+            var mappedList = _mapper.Map<IEnumerable<PhoneNumberViewModel>>(paginatedList);
             return mappedList;
         }
         public async Task<IEnumerable<IDto>> GetUserAllBlockedNumbers()

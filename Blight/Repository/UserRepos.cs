@@ -197,9 +197,9 @@ namespace Blight.Repository
             await _blightDbContext.SaveChangesAsync();
         }
 
-        public async override Task<IEnumerable<IDto>> GetAll(Expression<Func<User, bool>>? predicate)
+        public async override Task<IEnumerable<IDto>> GetAll(IPagination paginationQuery)
         {
-            var users = await base.GetAll(predicate);
+            var users = await base.GetAll(paginationQuery);
             var tempUsers = users as List<User>;
 
             var result = _mapper.Map<IEnumerable<GetAllUserViewModel>>(tempUsers);

@@ -26,13 +26,9 @@ namespace Blight.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PhoneNumber>>> GetAll(bool onlyBullyNumbers)
+        public async Task<ActionResult<IEnumerable<PhoneNumber>>> GetAll([FromQuery] PaginationPhoneQuery paginationQuery)
         {
-            if (onlyBullyNumbers)
-            {
-                return Ok(await _phoneNumberRepos2.GetAll(c => c.IsBully == true));
-            }
-            return Ok(await _phoneNumberRepos2.GetAll());
+            return Ok(await _phoneNumberRepos2.GetAll(paginationQuery));
         }
 
         [HttpGet]

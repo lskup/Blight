@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using Blight.Exceptions;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Blight.Models;
 
 namespace Blight.Repository
 {
@@ -64,19 +65,20 @@ namespace Blight.Repository
             return result;
         }
 
-        public virtual async Task<IEnumerable<IDto>> GetAll(Expression<Func<T, bool>>? predicate)
+        public virtual async Task<IEnumerable<IDto>> GetAll(IPagination paginationQuery)
         {
-            if (predicate is null)
-            {
-                return await _dbSet
-                    .AsNoTracking()
-                    .ToListAsync();
-            }
+            var paginationObj = paginationQuery as PaginationQuery;
 
-            return await _dbSet
-                .Where(predicate)
+            var list = await _dbSet
                 .AsNoTracking()
                 .ToListAsync();
+
+            var paginatedList = list
+                    .Skip(paginationObj.PageSize * (paginationObj.PageNumber - 1))
+                    .Take(paginationObj.PageSize)
+                    .ToList();
+
+            return paginatedList;
         }
 
         public virtual async Task<IDto> GetById(int id)
