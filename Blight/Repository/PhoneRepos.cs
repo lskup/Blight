@@ -35,7 +35,7 @@ namespace Blight.Repository
             throw new ForbiddenException("You have not authority for this action") :
             findActiveUser;
 
-        public async override Task<IEnumerable<IDto>> GetAll(IPagination paginationPhoneQuery)
+        public async override Task<IPagedResult<IDto>> GetAll(IPagination paginationPhoneQuery)
         {
             var paginationPhoneObj = paginationPhoneQuery as PaginationPhoneQuery;
             List<PhoneNumber> listOfNumbers;
@@ -43,7 +43,9 @@ namespace Blight.Repository
             listOfNumbers = await _dbSet
                 .Include(x => x.Users)
                 .AsNoTracking()
-                .Where(x => paginationPhoneObj.onlyBlockedNumbers == false || x.IsBully == true)
+                .Where(x=>paginationPhoneObj.onlyBlockedNumbers ==false || paginationPhoneObj.onlyBlockedNumbers == true && x.IsBully == true)
+                .Where(r => paginationPhoneObj.SearchPhrase == null || (r.Number.Contains(paginationPhoneObj.SearchPhrase)) ||
+                        paginationPhoneObj.onlyBlockedNumbers)
                 .ToListAsync();
 
             var paginatedList = listOfNumbers
@@ -51,20 +53,43 @@ namespace Blight.Repository
                 .Take(paginationPhoneObj.PageSize)
                 .ToList();
 
+            IEnumerable<IDto> result;
+
             if (activeUser.RoleId==2)
             {
-                return _mapper.Map<IEnumerable<AdminPhoneNumberViewModel>>(paginatedList); ;
+                result = _mapper.Map<IEnumerable<AdminPhoneNumberViewModel>>(paginatedList);
             }
 
-            var mappedList = _mapper.Map<IEnumerable<PhoneNumberViewModel>>(paginatedList);
-            return mappedList;
-        }
-        public async Task<IEnumerable<IDto>> GetUserAllBlockedNumbers()
-        {
-            var blockedNumbers = activeUser.BlockedNumbers;
-            var mappedNumbers = _mapper.Map<List<PhoneNumberViewModel>>(blockedNumbers);
+            else
+            {
+                result = _mapper.Map<IEnumerable<PhoneNumberViewModel>>(paginatedList);
+            }
 
-            return mappedNumbers;
+            var recordsTotal = result.Count();
+
+            var pageResult =
+                new PagedResult<IDto>(result, recordsTotal, paginationPhoneObj.PageSize, paginationPhoneObj.PageNumber);
+
+            return pageResult;
+        }
+        public async Task<IPagedResult<IDto>> GetUserAllBlockedNumbers(IPagination paginationQuery)
+        {
+            var paginationObj = paginationQuery as PaginationQuery;
+            var blockedNumbers = activeUser.BlockedNumbers;
+
+            var paginatedList = blockedNumbers
+                .Skip(paginationObj.PageSize * (paginationObj.PageNumber - 1))
+                .Take(paginationObj.PageSize)
+                .ToList();
+
+            var result = _mapper.Map<List<PhoneNumberViewModel>>(blockedNumbers);
+
+            var recordsTotal = result.Count();
+
+            var pageResult =
+                new PagedResult<IDto>(result, recordsTotal, paginationObj.PageSize, paginationObj.PageNumber);
+
+            return pageResult;
         }
 
         public async override Task<PhoneNumber> FindElement(Expression<Func<PhoneNumber, bool>> predicate)

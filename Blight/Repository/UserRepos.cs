@@ -197,13 +197,34 @@ namespace Blight.Repository
             await _blightDbContext.SaveChangesAsync();
         }
 
-        public async override Task<IEnumerable<IDto>> GetAll(IPagination paginationQuery)
+        public async override Task<IPagedResult<IDto>> GetAll(IPagination paginationQuery)
         {
-            var users = await base.GetAll(paginationQuery);
-            var tempUsers = users as List<User>;
 
-            var result = _mapper.Map<IEnumerable<GetAllUserViewModel>>(tempUsers);
-            return result;
+            var paginationObj = paginationQuery as PaginationUserQuery;
+            List<User> listOfUsers;
+
+            listOfUsers = await _dbSet
+                .AsNoTracking()
+                .Where(x=>paginationObj.IsBanned == false || paginationObj.IsBanned == true && x.Banned == true)
+                .Where(r => paginationObj.SearchPhrase == null ||
+                    (r.FirstName.ToLower().Contains(paginationObj.SearchPhrase.ToLower())) ||
+                    (r.LastName.ToLower().Contains(paginationObj.SearchPhrase.ToLower())) ||
+                    (r.Nationality.ToLower().Contains(paginationObj.SearchPhrase.ToLower())))
+                .ToListAsync();
+
+            var paginatedList = listOfUsers
+                .Skip(paginationObj.PageSize * (paginationObj.PageNumber - 1))
+                .Take(paginationObj.PageSize)
+                .ToList();
+
+            var result = _mapper.Map<IEnumerable<GetAllUserViewModel>>(paginatedList);
+
+            var recordsTotal = result.Count();
+
+            var pageResult =
+                new PagedResult<IDto>(result, recordsTotal, paginationObj.PageSize, paginationObj.PageNumber);
+
+            return pageResult;
 
         }
 

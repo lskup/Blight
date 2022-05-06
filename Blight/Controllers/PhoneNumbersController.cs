@@ -33,9 +33,9 @@ namespace Blight.Controllers
 
         [HttpGet]
         [Route("getBlockedNumbers")]
-        public async Task<ActionResult<IEnumerable<PhoneNumber>>> GetUserBlockedNumbers()
+        public async Task<ActionResult<IEnumerable<PhoneNumber>>> GetUserBlockedNumbers([FromQuery] PaginationPhoneQuery paginationQuery)
         {
-            return Ok(await _phoneNumberRepos2.GetUserAllBlockedNumbers());
+            return Ok(await _phoneNumberRepos2.GetUserAllBlockedNumbers(paginationQuery));
         }
 
 

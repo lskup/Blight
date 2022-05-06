@@ -9,7 +9,7 @@ namespace Blight.Interfaces
 {
     public interface IGenericRepository<T> where T : class,IDto
     {
-        Task<IEnumerable<IDto>> GetAll(IPagination paginationQuery);
+        Task<IPagedResult<IDto>> GetAll(IPagination paginationQuery);
         Task<IDto> GetById(int id);
         Task<T> Create(IDto entity);
         Task Delete(int id);

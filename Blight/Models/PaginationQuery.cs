@@ -9,7 +9,9 @@ namespace Blight.Models
 {
     public class PaginationQuery:IPagination
     {
-        public int PageNumber { get; set; }
-        public int PageSize { get; set; }
+        public string? SearchPhrase { get; set; } = null;
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 5;
+
     }
 }

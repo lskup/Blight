@@ -65,7 +65,7 @@ namespace Blight.Repository
             return result;
         }
 
-        public virtual async Task<IEnumerable<IDto>> GetAll(IPagination paginationQuery)
+        public virtual async Task<IPagedResult<IDto>> GetAll(IPagination paginationQuery)
         {
             var paginationObj = paginationQuery as PaginationQuery;
 
@@ -78,7 +78,11 @@ namespace Blight.Repository
                     .Take(paginationObj.PageSize)
                     .ToList();
 
-            return paginatedList;
+            var recordsTotal = paginatedList.Count();
+
+            var pagedResult = new PagedResult<IDto>(paginatedList, recordsTotal, paginationObj.PageSize, paginationObj.PageNumber);
+
+            return pagedResult;
         }
 
         public virtual async Task<IDto> GetById(int id)
