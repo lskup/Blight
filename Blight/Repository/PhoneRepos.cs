@@ -38,37 +38,46 @@ namespace Blight.Repository
         public async override Task<IPagedResult<IDto>> GetAll(IPagination paginationPhoneQuery)
         {
             var paginationPhoneObj = paginationPhoneQuery as PaginationPhoneQuery;
-            List<PhoneNumber> listOfNumbers;
+            List<PhoneNumber> finalList;
+            List<PhoneNumber> entryList;
 
-            listOfNumbers = await _dbSet
+            entryList = await _dbSet
                 .Include(x => x.Users)
                 .AsNoTracking()
-                .Where(x=>paginationPhoneObj.onlyBlockedNumbers ==false || paginationPhoneObj.onlyBlockedNumbers == true && x.IsBully == true)
-                .Where(r => paginationPhoneObj.SearchPhrase == null || (r.Number.Contains(paginationPhoneObj.SearchPhrase)) ||
-                        paginationPhoneObj.onlyBlockedNumbers)
+                .Where(r => paginationPhoneObj.SearchPhrase == null || (r.Number.Contains(paginationPhoneObj.SearchPhrase)))
                 .ToListAsync();
 
-            var paginatedList = listOfNumbers
+            if(paginationPhoneObj.onlyBlockedNumbers ==true)
+            {
+                finalList = entryList.Where(x => x.IsBully == true)
+                                        .ToList();
+            }
+            else
+            {
+                finalList = entryList;
+            }
+
+            var paginatedList = finalList
                 .Skip(paginationPhoneObj.PageSize * (paginationPhoneObj.PageNumber - 1))
                 .Take(paginationPhoneObj.PageSize)
                 .ToList();
 
-            IEnumerable<IDto> result;
+            IEnumerable<IDto> mappedList;
 
             if (activeUser.RoleId==2)
             {
-                result = _mapper.Map<IEnumerable<AdminPhoneNumberViewModel>>(paginatedList);
+                mappedList = _mapper.Map<IEnumerable<AdminPhoneNumberViewModel>>(paginatedList);
             }
 
             else
             {
-                result = _mapper.Map<IEnumerable<PhoneNumberViewModel>>(paginatedList);
+                mappedList = _mapper.Map<IEnumerable<PhoneNumberViewModel>>(paginatedList);
             }
 
-            var recordsTotal = result.Count();
+            var recordsTotal = mappedList.Count();
 
             var pageResult =
-                new PagedResult<IDto>(result, recordsTotal, paginationPhoneObj.PageSize, paginationPhoneObj.PageNumber);
+                new PagedResult<IDto>(mappedList, recordsTotal, paginationPhoneObj.PageSize, paginationPhoneObj.PageNumber);
 
             return pageResult;
         }

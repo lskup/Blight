@@ -14,7 +14,7 @@ namespace Blight.Models
         [RegularExpression("[0-9]{2}",ErrorMessage ="Prefix must consist two digits")]
         public string? Prefix { get; set; }
         [Required]
-        [RegularExpression("[0-9]{9}", ErrorMessage = "Phone number must consist 9 digits")]
+        [RegularExpression("[0-9]{7,10}", ErrorMessage = "Phone number must consist from 7 to 10 digits")]
         public string? Number { get; set; }
 
     }

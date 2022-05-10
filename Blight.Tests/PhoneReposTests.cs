@@ -62,14 +62,14 @@ namespace Blight.Tests
         {
             // Arrange
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
-            GenericRepository<PhoneNumber> phoneRepos = new GenericRepository<PhoneNumber>(_dbContext, null);
+            PhoneRepos phoneRepos = new PhoneRepos(_dbContext, null,null);
 
             // Act
             var action = async () => await phoneRepos.GetById(id);
 
             // Assert
             var caughtException = Assert.ThrowsAsync<NotFoundException>(action);
-            Assert.Equal("Element not found", caughtException.Result.Message);
+            Assert.Equal("Number not found", caughtException.Result.Message);
         }
 
         [Fact]
@@ -149,7 +149,6 @@ namespace Blight.Tests
             var caughtException = Assert.ThrowsAsync<ForbiddenException>(action);
             Assert.Equal("You are banned, contact with administration", caughtException.Result.Message);
         }
-
 
     }
 }
