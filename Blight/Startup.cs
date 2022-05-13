@@ -103,6 +103,7 @@ namespace Blight
             services.AddAutoMapper(typeof(Startup));
             services.AddScoped<ErrorHandlingMiddleware>();
             services.AddScoped<IValidator<RegisterUserDto>, RegisterUserDtoValidator>();
+            services.AddScoped<IValidator<PaginationQuery>, PaginationQueryValidator>();
             services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
             services.AddScoped<IUserRepository, UserRepos>();
             services.AddScoped<IPhoneRepository, PhoneRepos>();
@@ -115,6 +116,8 @@ namespace Blight
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseResponseCaching();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

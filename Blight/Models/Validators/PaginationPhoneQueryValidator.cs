@@ -13,7 +13,7 @@ namespace Blight.Models.Validators
 
         public PaginationQueryValidator()
         {
-            RuleFor(r => r.PageNumber).GreaterThanOrEqualTo(1);
+            RuleFor( r => r.PageNumber).GreaterThanOrEqualTo(1);
             RuleFor(r => r.PageSize).Custom((value, context) =>
             {
                 if (!allowedPageSizes.Contains(value))

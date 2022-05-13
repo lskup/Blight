@@ -13,6 +13,7 @@ namespace Blight.Models
         public string Prefix { get; set; }
         public string Number { get; set; }
         public int Notified { get; set; }
+        public int IsBullyTreshold { get; set; }
 
     }
 }

@@ -38,6 +38,14 @@ namespace Blight.Controllers
             return Ok(await _phoneNumberRepos2.GetUserAllBlockedNumbers(paginationQuery));
         }
 
+        [HttpPost]
+        [Authorize(Roles ="Admin")]
+        [Route("setIsBullyTreshold/{id}")]
+        public async Task<ActionResult<IEnumerable<PhoneNumber>>> SetIsBullyTreshold(int id,[FromQuery] int treshold)
+        {
+            return Ok(await _phoneNumberRepos2.SetIsBullyTreshold(id,treshold));
+        }
+
 
         [HttpGet("{id}")]
         public async Task<ActionResult<PhoneNumberDto>> Get(int id)

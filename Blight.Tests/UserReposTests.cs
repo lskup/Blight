@@ -19,7 +19,7 @@ using Blight.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using Blight.Models;
 
-namespace Blight.Tests
+namespace Blight.UnitTests
 {
     public class UserReposTests
     {

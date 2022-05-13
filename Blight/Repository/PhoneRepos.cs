@@ -50,7 +50,7 @@ namespace Blight.Repository
             if(paginationPhoneObj.onlyBlockedNumbers ==true)
             {
                 finalList = entryList.Where(x => x.IsBully == true)
-                                        .ToList();
+                                     .ToList();
             }
             else
             {
@@ -136,6 +136,7 @@ namespace Blight.Repository
             if(existingPhoneNumber is null)
             {
                 phoneNumber.Users.Add(activeUser);
+                await _dbSet.AddAsync(phoneNumber);
             }
             else
             {
@@ -162,15 +163,15 @@ namespace Blight.Repository
 
             if(userRole == 1)
             {
-                var userNumberList = activeUser.BlockedNumbers;
-
-                foreach (var userNumber in userNumberList)
+                var phoneNumberinUserBlockedList = activeUser
+                                .BlockedNumbers
+                                .FirstOrDefault(x => x.Prefix == phoneNumber.Prefix && x.Number == phoneNumber.Number);
+                if(phoneNumberinUserBlockedList == null)
                 {
-                    if (userNumber.Number == phoneNumber.Number)
-                    {
-                        activeUser.BlockedNumbers.Remove(phoneNumber);
-                    }
+                    throw new ForbiddenException("Number not belong to your list");
                 }
+                activeUser.BlockedNumbers.Remove(phoneNumberinUserBlockedList);
+
             }
             if(userRole ==2)
             {
@@ -197,6 +198,27 @@ namespace Blight.Repository
             var result = _mapper.Map<PhoneNumberViewModel>(element);
 
             return result;
+        }
+
+        public async Task<string> SetIsBullyTreshold(int id, int treshold)
+        {
+            var phoneNumber = await _dbSet
+                    .FirstOrDefaultAsync(i => i.Id == id);
+
+            if (phoneNumber is null)
+            {
+                throw new NotFoundException("Number not found");
+            }
+
+            phoneNumber.IsBullyTreshold = treshold;
+
+            _blightDbContext.Entry(phoneNumber)
+                            .CurrentValues
+                            .SetValues(phoneNumber);
+
+            await _blightDbContext.SaveChangesAsync();
+
+            return $"IsBullyTreshold for {phoneNumber.Prefix}{phoneNumber.Number} set to {treshold}";
         }
     }
 }

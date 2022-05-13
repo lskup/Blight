@@ -27,7 +27,7 @@ namespace Blight.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<IEnumerable<User>>> GetAll([FromQuery] IPagination paginationQuery)
+        public async Task<ActionResult<IEnumerable<User>>> GetAll([FromQuery] PaginationUserQuery paginationQuery)
         {
             return Ok(await _userRepos.GetAll(paginationQuery));
         }

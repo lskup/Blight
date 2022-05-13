@@ -199,20 +199,30 @@ namespace Blight.Repository
 
         public async override Task<IPagedResult<IDto>> GetAll(IPagination paginationQuery)
         {
-
             var paginationObj = paginationQuery as PaginationUserQuery;
-            List<User> listOfUsers;
+            List<User> entryList;
+            List<User> finalList;
 
-            listOfUsers = await _dbSet
+            entryList = await _dbSet
                 .AsNoTracking()
-                .Where(x=>paginationObj.IsBanned == false || paginationObj.IsBanned == true && x.Banned == true)
                 .Where(r => paginationObj.SearchPhrase == null ||
                     (r.FirstName.ToLower().Contains(paginationObj.SearchPhrase.ToLower())) ||
                     (r.LastName.ToLower().Contains(paginationObj.SearchPhrase.ToLower())) ||
                     (r.Nationality.ToLower().Contains(paginationObj.SearchPhrase.ToLower())))
                 .ToListAsync();
 
-            var paginatedList = listOfUsers
+            if (paginationObj.IsBanned == true)
+            {
+                finalList = entryList.Where(x => x.Banned == true)
+                                     .ToList();
+            }
+            else
+            {
+                finalList = entryList;
+            }
+
+
+            var paginatedList = finalList
                 .Skip(paginationObj.PageSize * (paginationObj.PageNumber - 1))
                 .Take(paginationObj.PageSize)
                 .ToList();
@@ -236,6 +246,11 @@ namespace Blight.Repository
             var newUserStatus = !userStatus;
             user.Banned = newUserStatus;
 
+            _blightDbContext.Entry(user)
+                            .CurrentValues
+                            .SetValues(user);
+
+            await _blightDbContext.SaveChangesAsync();    
             string result = $"User {user.ToString()} " + String.Format("{0}",newUserStatus?"banned":"unbanned");
 
             return result;

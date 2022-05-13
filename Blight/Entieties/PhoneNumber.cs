@@ -17,7 +17,7 @@ namespace Blight.Entieties
         {
             get
             {
-                if(Notified >20)
+                if(Notified >IsBullyTreshold)
                 {
                     return true;
                 }
@@ -28,6 +28,10 @@ namespace Blight.Entieties
             }
         }
 
-        public ICollection<User> Users { get; set; }
+        public int IsBullyTreshold { get; set; } = 20;
+
+        public virtual ICollection<User> Users { get; set; }
+
     }
+
 }

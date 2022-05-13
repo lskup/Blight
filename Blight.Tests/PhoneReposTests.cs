@@ -17,7 +17,7 @@ using Blight.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using Blight.Models;
 
-namespace Blight.Tests
+namespace Blight.UnitTests
 {
     public class PhoneReposTests
     {
@@ -133,7 +133,6 @@ namespace Blight.Tests
             var mapper = new Mock<IMapper>();
             var stubbedUser = new Mock<IUserContextService>();
 
-
             var existingNumber = _dbContext.PhoneNumbers.First();
 
             mapper.SetReturnsDefault(existingNumber);
@@ -148,6 +147,67 @@ namespace Blight.Tests
             // Assert
             var caughtException = Assert.ThrowsAsync<ForbiddenException>(action);
             Assert.Equal("You are banned, contact with administration", caughtException.Result.Message);
+        }
+
+        [Fact]
+        public async Task Delete_UserTriesDeleteNotOwnedNumber_ForbiddendException()
+        {
+            // Arrange
+            var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
+            var mapper = new Mock<IMapper>();
+            var stubbedUser = new Mock<IUserContextService>();
+
+            var existingNumber = _dbContext.PhoneNumbers.First();
+
+            mapper.SetReturnsDefault(existingNumber);
+            stubbedUser.Setup(x => x.GetUserId)
+                       .Returns(1);
+
+            PhoneRepos phoneRepos = new PhoneRepos(_dbContext, mapper.Object, stubbedUser.Object);
+
+            // Act
+            var action = async () => await phoneRepos.Delete(2);
+
+            // Assert
+            var caughtException = Assert.ThrowsAsync<ForbiddenException>(action);
+            Assert.Equal("Number not belong to your list", caughtException.Result.Message);
+        }
+
+        [Fact]
+        public async Task SetIsBullyTreshold_LowerThanIsBully_IsBullyChangingToFalse()
+        {
+            // Arrange
+            var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
+
+            PhoneRepos phoneRepos = new PhoneRepos(_dbContext, null, null);
+
+            // Act
+            var setNewTreshold = await phoneRepos.SetIsBullyTreshold(4,10);
+            var phoneNumber = _dbContext.PhoneNumbers.Find(4);
+
+            // Assert
+            Assert.NotNull(phoneNumber);
+            Assert.Equal(10, phoneNumber.IsBullyTreshold);
+            Assert.Equal(false, phoneNumber.IsBully);
+
+        }
+        [Fact]
+        public async Task SetIsBullyTreshold_HigherThanIsBully_IsBullyChangingToTrue()
+        {
+            // Arrange
+            var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
+
+            PhoneRepos phoneRepos = new PhoneRepos(_dbContext, null, null);
+
+            // Act
+            var setNewTreshold = await phoneRepos.SetIsBullyTreshold(4, 1);
+            var phoneNumber = _dbContext.PhoneNumbers.Find(4);
+
+            // Assert
+            Assert.NotNull(phoneNumber);
+            Assert.Equal(1, phoneNumber.IsBullyTreshold);
+            Assert.Equal(true, phoneNumber.IsBully);
+
         }
 
     }

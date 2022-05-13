@@ -14,6 +14,8 @@ namespace Blight.Models
         public string LastName { get; set; }
         public string Nationality { get; set; }
         public DateTime DateOfBirth { get; set; }
+        public bool Banned { get; set; }
+
 
     }
 }

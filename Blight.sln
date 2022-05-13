@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31624.102
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32319.34
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blight", "Blight\Blight.csproj", "{62E57BC0-9DEE-44C6-8D6E-FDF7A47D4968}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blight.Tests", "Blight.Tests\Blight.Tests.csproj", "{CCC62571-1C81-4491-9F16-CBF5B9A1E683}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blight.UnitTests", "Blight.Tests\Blight.UnitTests.csproj", "{CCC62571-1C81-4491-9F16-CBF5B9A1E683}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blight.IntegrationTests", "Blight.IntegrationTests\Blight.IntegrationTests.csproj", "{64924854-5B6A-484D-B62C-E12FFD88FFFA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{CCC62571-1C81-4491-9F16-CBF5B9A1E683}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CCC62571-1C81-4491-9F16-CBF5B9A1E683}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CCC62571-1C81-4491-9F16-CBF5B9A1E683}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64924854-5B6A-484D-B62C-E12FFD88FFFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64924854-5B6A-484D-B62C-E12FFD88FFFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64924854-5B6A-484D-B62C-E12FFD88FFFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64924854-5B6A-484D-B62C-E12FFD88FFFA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Blight.Migrations
 {
     [DbContext(typeof(BlightDbContext))]
-    [Migration("20220425171648_V1")]
-    partial class V1
+    [Migration("20220511143539_V1.1")]
+    partial class V11
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -75,6 +75,9 @@ namespace Blight.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("Banned")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("datetime2");

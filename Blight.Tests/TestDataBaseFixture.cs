@@ -7,7 +7,7 @@ using Blight.Entieties;
 using Blight.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
-namespace Blight.Tests
+namespace Blight.UnitTests
 {
     public class TestDataBaseFixture
     {

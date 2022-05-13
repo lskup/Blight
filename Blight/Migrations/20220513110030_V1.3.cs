@@ -2,23 +2,23 @@
 
 namespace Blight.Migrations
 {
-    public partial class UserBanProperty : Migration
+    public partial class V13 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "Banned",
-                table: "Users",
-                type: "bit",
+            migrationBuilder.AddColumn<int>(
+                name: "IsBullyTreshold",
+                table: "PhoneNumbers",
+                type: "int",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: 0);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Banned",
-                table: "Users");
+                name: "IsBullyTreshold",
+                table: "PhoneNumbers");
         }
     }
 }

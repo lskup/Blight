@@ -4,14 +4,16 @@ using Blight.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Blight.Migrations
 {
     [DbContext(typeof(BlightDbContext))]
-    partial class BlightDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220511135302_V1.0")]
+    partial class V10
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -25,9 +27,6 @@ namespace Blight.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("IsBullyTreshold")
-                        .HasColumnType("int");
 
                     b.Property<string>("Number")
                         .IsRequired()

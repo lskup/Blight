@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Blight.Tests
+namespace Blight.UnitTests
 {
     public class InMemoryDataBaseFixture
     {
@@ -39,7 +39,7 @@ namespace Blight.Tests
                         Password = "sad325sadcd5fds5d5",
                         RoleId = i % 2 == 1 ? 1 : 2,
                         BlockedNumbers = new List<PhoneNumber>(),
-                        Banned = i%2==0?true:false,
+                        Banned = i % 2 == 0 ? true : false,
 
                     });
                     await databaseContext.PhoneNumbers.AddAsync(new PhoneNumber()
@@ -50,15 +50,27 @@ namespace Blight.Tests
                         {
                             databaseContext.Users.Find(i)
                         }
-
-                    }); 
-                    await databaseContext.SaveChangesAsync();
+                    });
                 }
+                await databaseContext.PhoneNumbers.AddAsync(
+          new PhoneNumber
+                {
+                    Prefix = "11",
+                    Number = "123456789",
+                    Users = new List<User>
+                    {
+                        databaseContext.Users.Find(1),
+                        databaseContext.Users.Find(2),
+                        databaseContext.Users.Find(3),
+                    },
+                    IsBullyTreshold = 2,
+
+                });
+                await databaseContext.SaveChangesAsync();
             }
-
             return databaseContext;
-        }
 
+        }
 
     }
 }

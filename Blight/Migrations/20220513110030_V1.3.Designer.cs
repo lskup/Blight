@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Blight.Migrations
 {
     [DbContext(typeof(BlightDbContext))]
-    [Migration("20220426140104_UserBanProperty")]
-    partial class UserBanProperty
+    [Migration("20220513110030_V1.3")]
+    partial class V13
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -27,6 +27,9 @@ namespace Blight.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("IsBullyTreshold")
+                        .HasColumnType("int");
 
                     b.Property<string>("Number")
                         .IsRequired()
