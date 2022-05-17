@@ -103,7 +103,8 @@ namespace Blight
             services.AddAutoMapper(typeof(Startup));
             services.AddScoped<ErrorHandlingMiddleware>();
             services.AddScoped<IValidator<RegisterUserDto>, RegisterUserDtoValidator>();
-            services.AddScoped<IValidator<PaginationQuery>, PaginationQueryValidator>();
+            services.AddScoped<IValidator<PaginationPhoneQuery>, PaginationQueryValidator>();
+            services.AddScoped<IValidator<PaginationUserQuery>, PaginationQueryValidator>();
             services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
             services.AddScoped<IUserRepository, UserRepos>();
             services.AddScoped<IPhoneRepository, PhoneRepos>();

@@ -46,6 +46,13 @@ namespace Blight.Controllers
             return Ok(await _phoneNumberRepos2.SetIsBullyTreshold(id,treshold));
         }
 
+        //[HttpPost]
+        //[Route("syncBlockedNumbers")]
+        //public async Task<ActionResult<IEnumerable<PhoneNumber>>> SyncBlockedNumbers([FromBody] object jsonBlockedNumbers)
+        //{
+        //    return Ok(await _phoneNumberRepos2.GetUserAllBlockedNumbers(paginationQuery));
+        //}
+
 
         [HttpGet("{id}")]
         public async Task<ActionResult<PhoneNumberDto>> Get(int id)

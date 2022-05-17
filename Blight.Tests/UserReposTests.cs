@@ -244,5 +244,20 @@ namespace Blight.UnitTests
             Assert.Equal("You have not authority for this action", caughtException.Result.Message);
         }
 
+        [Fact]
+        public async Task BanUserChange_ExisingUser_UserBanStatusInfo()
+        {
+            // Arrange
+            var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
+
+            UserRepos userRepos = new UserRepos(_dbContext, null, null, null, null);
+
+            // Act
+            var result = await userRepos.BanUser_Change(1);
+
+            // Assert
+            Assert.NotNull(result);
+        }
+
     }
 }

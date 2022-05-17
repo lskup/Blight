@@ -241,6 +241,11 @@ namespace Blight.Repository
         public async Task<string> BanUser_Change(int id)
         {
             var user =await FindElement(x=>x.Id == id);
+            if (user is null)
+            {
+                throw new NotFoundException("User not found");
+            }
+
             var userStatus = user.Banned;
 
             var newUserStatus = !userStatus;
