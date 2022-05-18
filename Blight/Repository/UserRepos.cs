@@ -16,6 +16,7 @@ using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using Blight.Authentication;
+using Blight.Enums;
 
 namespace Blight.Repository
 {
@@ -200,36 +201,44 @@ namespace Blight.Repository
         public async override Task<IPagedResult<IDto>> GetAllPaginated(IPagination paginationQuery)
         {
             var paginationObj = paginationQuery as PaginationUserQuery;
-            List<User> entryList;
             List<User> finalList;
 
-            entryList = await _dbSet
+            var entryList = _dbSet
                 .AsNoTracking()
                 .Where(r => paginationObj.SearchPhrase == null ||
                     (r.FirstName.ToLower().Contains(paginationObj.SearchPhrase.ToLower())) ||
                     (r.LastName.ToLower().Contains(paginationObj.SearchPhrase.ToLower())) ||
-                    (r.Nationality.ToLower().Contains(paginationObj.SearchPhrase.ToLower())))
-                .ToListAsync();
+                    (r.Nationality.ToLower().Contains(paginationObj.SearchPhrase.ToLower())));
+                
+
+            Dictionary<SortUserBy, Expression<Func<User, object>>> userSortOptions_userProperties_Pairs = new Dictionary<SortUserBy, Expression<Func<User, object>>>
+            {
+                {SortUserBy.FirstName,p=>p.FirstName},
+                {SortUserBy.LastName,p=>p.LastName},
+                {SortUserBy.Nationality,p=>p.Nationality},
+                {SortUserBy.RoleId,p=>p.RoleId},
+            };
+
+            var selected = userSortOptions_userProperties_Pairs[paginationObj.sortUserBy];
+
+            entryList = paginationObj.sortDirection == SortDirection.Asc
+                                            ? entryList.OrderBy(selected)
+                                            : entryList.OrderByDescending(selected);
 
             if (paginationObj.onlyBannedUsers == true)
             {
-                finalList = entryList.Where(x => x.Banned == true)
-                                     .ToList();
-            }
-            else
-            {
-                finalList = entryList;
+                entryList = entryList.Where(x => x.Banned == true);
             }
 
 
-            var paginatedList = finalList
+            var paginatedList = entryList
                 .Skip(paginationObj.PageSize * (paginationObj.PageNumber - 1))
                 .Take(paginationObj.PageSize)
                 .ToList();
 
             var result = _mapper.Map<IEnumerable<GetAllUserViewModel>>(paginatedList);
 
-            var recordsTotal = finalList.Count();
+            var recordsTotal = entryList.Count();
 
             var pageResult =
                 new PagedResult<IDto>(result, recordsTotal, paginationObj.PageSize, paginationObj.PageNumber);

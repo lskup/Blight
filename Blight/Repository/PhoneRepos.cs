@@ -11,6 +11,7 @@ using Blight.Exceptions;
 using Blight.Interfaces;
 using AutoMapper;
 using Blight.Models;
+using Blight.Enums;
 
 namespace Blight.Repository
 {
@@ -39,9 +40,9 @@ namespace Blight.Repository
         {
             var paginationPhoneObj = paginationPhoneQuery as PaginationPhoneQuery;
             List<PhoneNumber> finalList;
-            List<PhoneNumber> entryList;
+            //List<PhoneNumber> entryList;
 
-            entryList = await _dbSet
+            var entryList = await _dbSet
                 .Include(x => x.Users)
                 .AsNoTracking()
                 .Where(r => paginationPhoneObj.SearchPhrase == null ||
@@ -49,7 +50,27 @@ namespace Blight.Repository
                                         (r.Prefix.Contains(paginationPhoneObj.SearchPhrase)))
                 .ToListAsync();
 
-            if(paginationPhoneObj.onlyBullyNumbers ==true)
+            switch (paginationPhoneObj.sortDirection)
+            {
+                case SortDirection.Asc:
+                    {
+                        entryList = entryList.OrderBy(x => x.Notified)
+                                             .ToList();
+                        break;
+                    }
+                case SortDirection.Desc:
+                    {
+                        entryList = entryList.OrderByDescending(x => x.Notified)
+                                             .ToList();
+                        break;
+                    }
+                default:
+                    {
+                        break;
+                    }
+            }
+
+            if (paginationPhoneObj.onlyBullyNumbers ==true)
             {
                 finalList = entryList.Where(x => x.IsBully == true)
                                      .ToList();
