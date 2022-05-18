@@ -105,6 +105,7 @@ namespace Blight
             services.AddScoped<IValidator<RegisterUserDto>, RegisterUserDtoValidator>();
             services.AddScoped<IValidator<PaginationPhoneQuery>, PaginationQueryValidator>();
             services.AddScoped<IValidator<PaginationUserQuery>, PaginationQueryValidator>();
+            services.AddScoped<IValidator<PaginationQuery>, PaginationQueryValidator>();
             services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
             services.AddScoped<IUserRepository, UserRepos>();
             services.AddScoped<IPhoneRepository, PhoneRepos>();

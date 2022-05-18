@@ -8,6 +8,14 @@ namespace Blight.Models
 {
     public class PaginationPhoneQuery:PaginationQuery
     {
-        public bool onlyBlockedNumbers { get; set; } = false;
+        public bool onlyBullyNumbers { get; set; } = false;
+        public SortDirection? sortDirection { get; set; } = null;
+
+    }
+
+    public enum SortDirection
+    {
+        Asc,
+        Desc,
     }
 }

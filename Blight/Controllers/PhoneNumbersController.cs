@@ -26,14 +26,14 @@ namespace Blight.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PhoneNumber>>> GetAll([FromQuery] PaginationPhoneQuery paginationQuery)
+        public async Task<ActionResult<IEnumerable<PhoneNumber>>> GetAllPaginated([FromQuery] PaginationPhoneQuery paginationQuery)
         {
-            return Ok(await _phoneNumberRepos2.GetAll(paginationQuery));
+            return Ok(await _phoneNumberRepos2.GetAllPaginated(paginationQuery));
         }
 
         [HttpGet]
         [Route("getBlockedNumbers")]
-        public async Task<ActionResult<IEnumerable<PhoneNumber>>> GetUserBlockedNumbers([FromQuery] PaginationPhoneQuery paginationQuery)
+        public async Task<ActionResult<IEnumerable<PhoneNumber>>> GetUserBlockedNumbers([FromQuery] PaginationQuery paginationQuery)
         {
             return Ok(await _phoneNumberRepos2.GetUserAllBlockedNumbers(paginationQuery));
         }
@@ -46,12 +46,12 @@ namespace Blight.Controllers
             return Ok(await _phoneNumberRepos2.SetIsBullyTreshold(id,treshold));
         }
 
-        //[HttpPost]
-        //[Route("syncBlockedNumbers")]
-        //public async Task<ActionResult<IEnumerable<PhoneNumber>>> SyncBlockedNumbers([FromBody] object jsonBlockedNumbers)
-        //{
-        //    return Ok(await _phoneNumberRepos2.GetUserAllBlockedNumbers(paginationQuery));
-        //}
+        [HttpPost]
+        [Route("syncBlockedNumbers")]
+        public async Task<ActionResult<IEnumerable<PhoneNumber>>> SyncBlockedNumbers([FromBody] IEnumerable<PhoneNumberDto> userBlockedNumbers)
+        {
+            return Ok(await _phoneNumberRepos2.SyncBlockedNumbers(userBlockedNumbers));
+        }
 
 
         [HttpGet("{id}")]

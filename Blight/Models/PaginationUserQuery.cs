@@ -8,6 +8,6 @@ namespace Blight.Models
 {
     public class PaginationUserQuery:PaginationQuery
     {
-        public bool IsBanned { get; set; }
+        public bool onlyBannedUsers { get; set; }
     }
 }

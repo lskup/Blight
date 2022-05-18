@@ -197,7 +197,7 @@ namespace Blight.Repository
             await _blightDbContext.SaveChangesAsync();
         }
 
-        public async override Task<IPagedResult<IDto>> GetAll(IPagination paginationQuery)
+        public async override Task<IPagedResult<IDto>> GetAllPaginated(IPagination paginationQuery)
         {
             var paginationObj = paginationQuery as PaginationUserQuery;
             List<User> entryList;
@@ -211,7 +211,7 @@ namespace Blight.Repository
                     (r.Nationality.ToLower().Contains(paginationObj.SearchPhrase.ToLower())))
                 .ToListAsync();
 
-            if (paginationObj.IsBanned == true)
+            if (paginationObj.onlyBannedUsers == true)
             {
                 finalList = entryList.Where(x => x.Banned == true)
                                      .ToList();
@@ -229,7 +229,7 @@ namespace Blight.Repository
 
             var result = _mapper.Map<IEnumerable<GetAllUserViewModel>>(paginatedList);
 
-            var recordsTotal = result.Count();
+            var recordsTotal = finalList.Count();
 
             var pageResult =
                 new PagedResult<IDto>(result, recordsTotal, paginationObj.PageSize, paginationObj.PageNumber);

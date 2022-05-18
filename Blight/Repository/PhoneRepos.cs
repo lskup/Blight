@@ -35,7 +35,7 @@ namespace Blight.Repository
             throw new ForbiddenException("You have not authority for this action") :
             findActiveUser;
 
-        public async override Task<IPagedResult<IDto>> GetAll(IPagination paginationPhoneQuery)
+        public async override Task<IPagedResult<IDto>> GetAllPaginated(IPagination paginationPhoneQuery)
         {
             var paginationPhoneObj = paginationPhoneQuery as PaginationPhoneQuery;
             List<PhoneNumber> finalList;
@@ -44,10 +44,12 @@ namespace Blight.Repository
             entryList = await _dbSet
                 .Include(x => x.Users)
                 .AsNoTracking()
-                .Where(r => paginationPhoneObj.SearchPhrase == null || (r.Number.Contains(paginationPhoneObj.SearchPhrase)))
+                .Where(r => paginationPhoneObj.SearchPhrase == null ||
+                                        (r.Number.Contains(paginationPhoneObj.SearchPhrase)) || 
+                                        (r.Prefix.Contains(paginationPhoneObj.SearchPhrase)))
                 .ToListAsync();
 
-            if(paginationPhoneObj.onlyBlockedNumbers ==true)
+            if(paginationPhoneObj.onlyBullyNumbers ==true)
             {
                 finalList = entryList.Where(x => x.IsBully == true)
                                      .ToList();
@@ -74,7 +76,7 @@ namespace Blight.Repository
                 mappedList = _mapper.Map<IEnumerable<PhoneNumberViewModel>>(paginatedList);
             }
 
-            var recordsTotal = mappedList.Count();
+            var recordsTotal = finalList.Count();
 
             var pageResult =
                 new PagedResult<IDto>(mappedList, recordsTotal, paginationPhoneObj.PageSize, paginationPhoneObj.PageNumber);
@@ -93,7 +95,7 @@ namespace Blight.Repository
 
             var result = _mapper.Map<List<PhoneNumberViewModel>>(blockedNumbers);
 
-            var recordsTotal = result.Count();
+            var recordsTotal = paginatedList.Count();
 
             var pageResult =
                 new PagedResult<IDto>(result, recordsTotal, paginationObj.PageSize, paginationObj.PageNumber);
@@ -219,6 +221,38 @@ namespace Blight.Repository
             await _blightDbContext.SaveChangesAsync();
 
             return $"IsBullyTreshold for {phoneNumber.Prefix}{phoneNumber.Number} set to {treshold}";
+        }
+
+        public async Task<IEnumerable<IDto>> SyncBlockedNumbers(IEnumerable<IDto> userBlockedNumbers)
+        {
+            List<PhoneNumberDto> dtosList = userBlockedNumbers as List<PhoneNumberDto>;
+
+            activeUser.BlockedNumbers.Clear();
+
+            _blightDbContext.Entry(activeUser)
+                            .CurrentValues
+                            .SetValues(activeUser);
+
+            await _blightDbContext.SaveChangesAsync();
+
+            foreach (var item in dtosList)
+            {
+                await Create(item);
+            }
+
+            return await GetAllBullyNumbersDto();
+        }
+
+        public async Task<IEnumerable<IDto>> GetAllBullyNumbersDto()
+        {
+            var allBlockedNumbers = await _dbSet
+                    .Include(o => o.Users)
+                    .Where(x=>x.Users.Count >= x.IsBullyTreshold)
+                    .ToListAsync();
+
+            var dtos = _mapper.Map<List<PhoneNumberDto>>(allBlockedNumbers);
+
+            return dtos;
         }
     }
 }
