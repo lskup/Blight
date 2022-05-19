@@ -12,5 +12,6 @@ namespace Blight.Models
         public bool onlyBannedUsers { get; set; }
         public SortDirection? sortDirection { get; set; } = null;
         public SortUserBy sortUserBy { get; set; }
+
     }
 }

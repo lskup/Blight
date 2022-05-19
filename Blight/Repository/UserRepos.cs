@@ -201,7 +201,6 @@ namespace Blight.Repository
         public async override Task<IPagedResult<IDto>> GetAllPaginated(IPagination paginationQuery)
         {
             var paginationObj = paginationQuery as PaginationUserQuery;
-            List<User> finalList;
 
             var entryList = _dbSet
                 .AsNoTracking()
@@ -220,7 +219,7 @@ namespace Blight.Repository
             };
 
             var selected = userSortOptions_userProperties_Pairs[paginationObj.sortUserBy];
-
+            
             entryList = paginationObj.sortDirection == SortDirection.Asc
                                             ? entryList.OrderBy(selected)
                                             : entryList.OrderByDescending(selected);

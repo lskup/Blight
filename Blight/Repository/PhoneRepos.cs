@@ -39,29 +39,24 @@ namespace Blight.Repository
         public async override Task<IPagedResult<IDto>> GetAllPaginated(IPagination paginationPhoneQuery)
         {
             var paginationPhoneObj = paginationPhoneQuery as PaginationPhoneQuery;
-            List<PhoneNumber> finalList;
-            //List<PhoneNumber> entryList;
 
-            var entryList = await _dbSet
+            var entryList = _dbSet
                 .Include(x => x.Users)
                 .AsNoTracking()
                 .Where(r => paginationPhoneObj.SearchPhrase == null ||
-                                        (r.Number.Contains(paginationPhoneObj.SearchPhrase)) || 
-                                        (r.Prefix.Contains(paginationPhoneObj.SearchPhrase)))
-                .ToListAsync();
+                                        (r.Number.Contains(paginationPhoneObj.SearchPhrase)) ||
+                                        (r.Prefix.Contains(paginationPhoneObj.SearchPhrase)));
 
             switch (paginationPhoneObj.sortDirection)
             {
                 case SortDirection.Asc:
                     {
-                        entryList = entryList.OrderBy(x => x.Notified)
-                                             .ToList();
+                        entryList = entryList.OrderBy(x => x.Notified);
                         break;
                     }
                 case SortDirection.Desc:
                     {
-                        entryList = entryList.OrderByDescending(x => x.Notified)
-                                             .ToList();
+                        entryList = entryList.OrderByDescending(x => x.Notified);
                         break;
                     }
                 default:
@@ -72,15 +67,10 @@ namespace Blight.Repository
 
             if (paginationPhoneObj.onlyBullyNumbers ==true)
             {
-                finalList = entryList.Where(x => x.IsBully == true)
-                                     .ToList();
-            }
-            else
-            {
-                finalList = entryList;
+                entryList = entryList.Where(x => x.IsBully == true);
             }
 
-            var paginatedList = finalList
+            var paginatedList = entryList
                 .Skip(paginationPhoneObj.PageSize * (paginationPhoneObj.PageNumber - 1))
                 .Take(paginationPhoneObj.PageSize)
                 .ToList();
@@ -97,7 +87,7 @@ namespace Blight.Repository
                 mappedList = _mapper.Map<IEnumerable<PhoneNumberViewModel>>(paginatedList);
             }
 
-            var recordsTotal = finalList.Count();
+            var recordsTotal = entryList.Count();
 
             var pageResult =
                 new PagedResult<IDto>(mappedList, recordsTotal, paginationPhoneObj.PageSize, paginationPhoneObj.PageNumber);
