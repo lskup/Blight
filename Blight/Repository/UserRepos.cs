@@ -17,6 +17,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using Blight.Authentication;
 using Blight.Enums;
+using Microsoft.Extensions.Logging;
+
 
 namespace Blight.Repository
 {
@@ -26,15 +28,19 @@ namespace Blight.Repository
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly ISchemeGenerator _schemeGenerator;
         private readonly IUserContextService _userContextService;
+        private readonly IAdminPasswordService _adminPasswordService;
+        private readonly ILogger<UserRepos> _logger;
 
 
-        public UserRepos(BlightDbContext blightDbContext, IMapper mapper, IPasswordHasher<User> passwordHasher, ISchemeGenerator schemeGenerator, IUserContextService userContextService)
+        public UserRepos(BlightDbContext blightDbContext, IMapper mapper, IPasswordHasher<User> passwordHasher, ISchemeGenerator schemeGenerator, IUserContextService userContextService, IAdminPasswordService adminPasswordService, ILogger<UserRepos> logger)
             : base(blightDbContext, mapper)
         {
             _mapper = mapper;
             _passwordHasher = passwordHasher;
             _schemeGenerator = schemeGenerator;
             _userContextService = userContextService;
+            _adminPasswordService = adminPasswordService;
+            _logger = logger;
         }
         private User? findActiveUser => _blightDbContext
                     .Users
@@ -51,7 +57,7 @@ namespace Blight.Repository
             var user = _mapper.Map<User>(dto);
             string? password = user.Password;
 
-            if(password.Equals("Admin123!"))
+            if(password.Equals(_adminPasswordService.ReadPasswordFromFile()))
             {
                 user.RoleId = 2;
             }
@@ -68,8 +74,13 @@ namespace Blight.Repository
 
             await _blightDbContext.SaveChangesAsync();
 
-            return user;
+            if(user.RoleId ==2)
+            {
+                _logger.LogInformation($"{user.Email} has been registered as admin");
+                _adminPasswordService.GenerateAndSavePasswordToDirectoryFromAppSettings();
+            }
 
+            return user;
         }
 
         public async Task<string> Login(IDto dto)
@@ -93,6 +104,10 @@ namespace Blight.Repository
 
             var token = _schemeGenerator.GenerateJWT(existingUser);
 
+            if(existingUser.RoleId == 2)
+            {
+                _logger.LogWarning($"{existingUser.Email} with IP:{_userContextService.GetUserIP} logged in as Admin");
+            }
             return token;
         }
 

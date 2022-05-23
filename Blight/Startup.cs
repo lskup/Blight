@@ -47,8 +47,9 @@ namespace Blight
             var authenticationSettings = new AuthenticationSettings();
             Configuration.GetSection("Authentication").Bind(authenticationSettings);
 
-
+            
             services.AddSingleton(authenticationSettings);
+            services.AddSingleton<IConfiguration>(Configuration);
             services
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(
@@ -111,6 +112,7 @@ namespace Blight
             services.AddScoped<IPhoneRepository, PhoneRepos>();
             services.AddScoped<ISchemeGenerator, SchemesGenerator>();
             services.AddScoped<IUserContextService, UserContextService>();
+            services.AddScoped<IAdminPasswordService, AdminPasswordService>();
             services.AddHttpContextAccessor();
 
         }

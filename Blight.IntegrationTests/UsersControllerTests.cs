@@ -15,6 +15,8 @@ using Blight.IntegrationTests.Helpers;
 using System.Linq;
 using Moq;
 using Blight.Interfaces;
+using Microsoft.Extensions.Logging;
+
 
 namespace Blight.IntegrationTests
 {
@@ -66,7 +68,7 @@ namespace Blight.IntegrationTests
         }
 
         [Fact]
-        public async Task Login_ValidObject_ReturnsOk()
+        public async Task Login_ValidUserObject_ReturnsOk()
         {
             //Arrange
             Mock<ISchemeGenerator> stubJwt = new Mock<ISchemeGenerator>();
@@ -84,12 +86,7 @@ namespace Blight.IntegrationTests
 
             //Assert
             Assert.Equal(System.Net.HttpStatusCode.OK, result.StatusCode);
-
-
         }
-
-
-
 
     }
 }

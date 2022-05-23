@@ -14,5 +14,6 @@ namespace Blight.Interfaces
     {
         ClaimsPrincipal User { get; }
         int? GetUserId { get; }
+        string GetUserIP { get; }
     }
 }

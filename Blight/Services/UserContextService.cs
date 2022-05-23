@@ -24,5 +24,8 @@ namespace Blight.Services
 
         public int? GetUserId =>
             User is null ? null : (int?)int.Parse(User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier).Value);
+
+        private string? DeterimineUserIP => _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();
+        public string GetUserIP => DeterimineUserIP is null ? "IP not determined" : $"{DeterimineUserIP}";
     }
 }

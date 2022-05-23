@@ -18,6 +18,7 @@ using Moq.AutoMock;
 using Blight.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using Blight.Models;
+using Microsoft.Extensions.Logging;
 
 namespace Blight.UnitTests
 {
@@ -27,7 +28,6 @@ namespace Blight.UnitTests
         public Mock<IGenericRepository<User>> mock = new Mock<IGenericRepository<User>>();
 
         //Purpose - passing predicate as test method parameter|==>[MemberData(nameof(predicates_GetAllMethod))]
-        //Cel - mo¿liwoœæ przekazania predykaty jako parametr testu |==>[MemberData(nameof(predicates_GetAllMethod))]
         public static TheoryData<Expression<Func<User, bool>>> predicates_GetAllMethod = new TheoryData<Expression<Func<User, bool>>>()
         {
             {x=>x.RoleId ==2 },
@@ -96,7 +96,8 @@ namespace Blight.UnitTests
             stubbedUser.Setup(x => x.GetUserId)
                        .Returns(1);
 
-            UserRepos userRepos = new UserRepos(_dbContext, null,null,null, stubbedUser.Object);
+            UserRepos userRepos = new UserRepos(_dbContext, null,null,null,
+                    stubbedUser.Object,null,null);
 
             // Act
             var action = async () => await userRepos.GetById(id);
@@ -109,14 +110,13 @@ namespace Blight.UnitTests
         [Fact]
         public async Task Create_MapperThrowsNewUser_ReturnNewUser()
         {
-            //Parametr metody Create (IDto dto) jest mapowany w ciele metody na obiekt User. Mapper jest zdublowany i zwraca konkretny obiekt User,
-            //dlatego nie ma sensu przekazywanie obiektu (dto) jako parametr testowy.
-
             // Arrange
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
             var mapper = new Mock<IMapper>();
             var hasher = new Mock<IPasswordHasher<User>>();
-           
+            var logger = new Mock<ILogger<UserRepos>>();
+            var adminService = new Mock<IAdminPasswordService>();
+
             mapper.SetReturnsDefault(new User()
             {
                 FirstName = "testUser0",
@@ -125,8 +125,11 @@ namespace Blight.UnitTests
                 Password = "tester"
             });
             hasher.SetReturnsDefault<string>("sd33454cecreds");
+            logger.SetReturnsDefault<string>("Creating user sample");
+            adminService.SetReturnsDefault("Admin123!");
 
-            UserRepos userRepos = new UserRepos(_dbContext, mapper.Object,hasher.Object,null,null);
+            UserRepos userRepos = new UserRepos(_dbContext, mapper.Object,hasher.Object
+                ,null,null,adminService.Object,logger.Object);
 
             // Act
             var user = await userRepos.Create(null);
@@ -141,13 +144,13 @@ namespace Blight.UnitTests
         [Fact]
         public async Task Create_AdminPassword_ReturnNewUserRoleId_2()
         {
-            //Parametr metody Create (IDto dto) jest mapowany w ciele metody na obiekt User. Mapper jest zdublowany i zwraca konkretny obiekt User,
-            //dlatego nie ma sensu przekazywanie obiektu (dto) jako parametr testowy.
 
             // Arrange
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
             var mapper = new Mock<IMapper>();
             var hasher = new Mock<IPasswordHasher<User>>();
+            var logger = new Mock<ILogger<UserRepos>>();
+            var adminService = new Mock<IAdminPasswordService>();
 
             mapper.SetReturnsDefault(new User()
             {
@@ -157,8 +160,11 @@ namespace Blight.UnitTests
                 Password = "Admin123!"
             });
             hasher.SetReturnsDefault<string>("sd33454cecreds3df");
+            logger.SetReturnsDefault<string>("Creating user sample");
+            adminService.SetReturnsDefault("Admin123!");
 
-            UserRepos userRepos = new UserRepos(_dbContext, mapper.Object, hasher.Object, null,null);
+            UserRepos userRepos = new UserRepos(_dbContext, mapper.Object, hasher.Object,
+                null,null,adminService.Object,logger.Object);
 
             // Act
             var user = await userRepos.Create(null);
@@ -180,7 +186,8 @@ namespace Blight.UnitTests
             stubbedUser.Setup(x => x.GetUserId)
                        .Returns(1);
 
-            UserRepos userRepos = new UserRepos(_dbContext, null, null, null, stubbedUser.Object);
+            UserRepos userRepos = new UserRepos(_dbContext, null, null, null,
+                stubbedUser.Object,null,null);
 
             // Act
             var action = async () => await userRepos.Delete(id);
@@ -207,7 +214,8 @@ namespace Blight.UnitTests
                        .Returns(1);
 
 
-            UserRepos userRepos = new UserRepos(_dbContext, null,null,null,stubbedUser.Object);
+            UserRepos userRepos = new UserRepos(_dbContext, null,null,null,
+                stubbedUser.Object,null,null);
 
             // Act
             var updatedUser = await userRepos.Update(1,userDto);
@@ -234,7 +242,8 @@ namespace Blight.UnitTests
             stubbedUser.Setup(x => x.GetUserId)
                        .Returns(1);
 
-            UserRepos userRepos = new UserRepos(_dbContext, null, null,null,stubbedUser.Object);
+            UserRepos userRepos = new UserRepos(_dbContext, null, null,null,
+                stubbedUser.Object,null,null);
 
             // Act
             var action =async() => await userRepos.Update(10, userDto);
@@ -250,7 +259,8 @@ namespace Blight.UnitTests
             // Arrange
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
 
-            UserRepos userRepos = new UserRepos(_dbContext, null, null, null, null);
+            UserRepos userRepos = new UserRepos(_dbContext, null, null, null,
+                null,null,null);
 
             // Act
             var result = await userRepos.BanUser_Change(1);
