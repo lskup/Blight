@@ -15,6 +15,7 @@ namespace Blight.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
 
     public class UsersController : ControllerBase
     {
@@ -26,14 +27,13 @@ namespace Blight.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Master")]
         public async Task<ActionResult<IEnumerable<User>>> GetAllPaginated([FromQuery] PaginationUserQuery paginationQuery)
         {
             return Ok(await _userRepos.GetAllPaginated(paginationQuery));
         }
 
         [HttpGet("{id}")]
-        [Authorize(Roles = "User,Admin")]
         public async Task<ActionResult<User>> Get(int id)
         {
             var result = await _userRepos.GetById(id);
@@ -54,7 +54,6 @@ namespace Blight.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles ="User,Admin")]
         public async Task<IActionResult> Put(int id, [FromBody] UpdateUserDto dto)
         {
             await _userRepos.Update(id, dto);
@@ -63,7 +62,6 @@ namespace Blight.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             await _userRepos.Delete(id);
@@ -72,7 +70,7 @@ namespace Blight.Controllers
         }
 
         [HttpPost("ban/{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Master")]
         public async Task<ActionResult<User>> UserBanStatus_Change(int id)
         {
             var result = await _userRepos.BanUser_Change(id);

@@ -113,7 +113,7 @@ namespace Blight.UnitTests
 
             mapper.SetReturnsDefault(existingNumber);
             stubbedUser.Setup(x => x.GetUserId)
-                       .Returns(1);
+                       .Returns(3);
 
             PhoneRepos phoneRepos = new PhoneRepos(_dbContext, mapper.Object,stubbedUser.Object);
 
@@ -137,7 +137,7 @@ namespace Blight.UnitTests
 
             mapper.SetReturnsDefault(existingNumber);
             stubbedUser.Setup(x => x.GetUserId)
-                       .Returns(2);
+                       .Returns(4);
 
             PhoneRepos phoneRepos = new PhoneRepos(_dbContext, mapper.Object, stubbedUser.Object);
 

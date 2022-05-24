@@ -17,7 +17,7 @@ namespace Blight.Entieties
         public string Email { get; set; }
         public string Password { get; set; }
         public virtual ICollection<PhoneNumber> BlockedNumbers { get; set; }
-        public int RoleId { get; set; } = 1;
+        public int RoleId { get; set; } = 3;
         public Role Role { get; set; }
         public bool Banned { get; set; }
 

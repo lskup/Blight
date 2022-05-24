@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Blight.Migrations
 {
     [DbContext(typeof(BlightDbContext))]
-    [Migration("20220511143539_V1.1")]
-    partial class V11
+    [Migration("20220524124458_V1.0")]
+    partial class V10
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -27,6 +27,9 @@ namespace Blight.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("IsBullyTreshold")
+                        .HasColumnType("int");
 
                     b.Property<string>("Number")
                         .IsRequired()
@@ -60,12 +63,17 @@ namespace Blight.Migrations
                         new
                         {
                             Id = 1,
-                            Name = "User"
+                            Name = "Master"
                         },
                         new
                         {
                             Id = 2,
                             Name = "Admin"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "User"
                         });
                 });
 
@@ -110,6 +118,44 @@ namespace Blight.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Banned = false,
+                            DateOfBirth = new DateTime(1999, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "master@example.com",
+                            FirstName = "Master",
+                            LastName = "Master",
+                            Nationality = "Poland",
+                            Password = "AQAAAAEAACcQAAAAEIqVkVbKzIPnKViW//zCSfdAZkiGiU3e5sJ1ewbtsF966WFkhXOvNbHIFMYFgKzHpQ==",
+                            RoleId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Banned = false,
+                            DateOfBirth = new DateTime(1999, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "admin@example.com",
+                            FirstName = "Admin",
+                            LastName = "Admin",
+                            Nationality = "Poland",
+                            Password = "AQAAAAEAACcQAAAAEN0vmYl6vhX0785CoKJcTWNVYm3qbIzERBcoGN9MOKp0BdWResQGTaVteQVNxHYhhA==",
+                            RoleId = 2
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Banned = false,
+                            DateOfBirth = new DateTime(1999, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "user@example.com",
+                            FirstName = "User",
+                            LastName = "User",
+                            Nationality = "Poland",
+                            Password = "AQAAAAEAACcQAAAAEPX5W8qOzGNKA6fs58nDb2H/uTfY60LiQUGTUMf7Ixqd16olYt9XzXgvekjlh7RGZg==",
+                            RoleId = 3
+                        });
                 });
 
             modelBuilder.Entity("PhoneNumberUser", b =>

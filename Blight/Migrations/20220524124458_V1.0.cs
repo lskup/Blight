@@ -14,7 +14,8 @@ namespace Blight.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Prefix = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Number = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Number = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsBullyTreshold = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -87,12 +88,32 @@ namespace Blight.Migrations
             migrationBuilder.InsertData(
                 table: "Roles",
                 columns: new[] { "Id", "Name" },
-                values: new object[] { 1, "User" });
+                values: new object[] { 1, "Master" });
 
             migrationBuilder.InsertData(
                 table: "Roles",
                 columns: new[] { "Id", "Name" },
                 values: new object[] { 2, "Admin" });
+
+            migrationBuilder.InsertData(
+                table: "Roles",
+                columns: new[] { "Id", "Name" },
+                values: new object[] { 3, "User" });
+
+            migrationBuilder.InsertData(
+                table: "Users",
+                columns: new[] { "Id", "Banned", "DateOfBirth", "Email", "FirstName", "LastName", "Nationality", "Password", "RoleId" },
+                values: new object[] { 1, false, new DateTime(1999, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "master@example.com", "Master", "Master", "Poland", "AQAAAAEAACcQAAAAEIqVkVbKzIPnKViW//zCSfdAZkiGiU3e5sJ1ewbtsF966WFkhXOvNbHIFMYFgKzHpQ==", 1 });
+
+            migrationBuilder.InsertData(
+                table: "Users",
+                columns: new[] { "Id", "Banned", "DateOfBirth", "Email", "FirstName", "LastName", "Nationality", "Password", "RoleId" },
+                values: new object[] { 2, false, new DateTime(1999, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "admin@example.com", "Admin", "Admin", "Poland", "AQAAAAEAACcQAAAAEN0vmYl6vhX0785CoKJcTWNVYm3qbIzERBcoGN9MOKp0BdWResQGTaVteQVNxHYhhA==", 2 });
+
+            migrationBuilder.InsertData(
+                table: "Users",
+                columns: new[] { "Id", "Banned", "DateOfBirth", "Email", "FirstName", "LastName", "Nationality", "Password", "RoleId" },
+                values: new object[] { 3, false, new DateTime(1999, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "user@example.com", "User", "User", "Poland", "AQAAAAEAACcQAAAAEPX5W8qOzGNKA6fs58nDb2H/uTfY60LiQUGTUMf7Ixqd16olYt9XzXgvekjlh7RGZg==", 3 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_PhoneNumberUser_UsersId",

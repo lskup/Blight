@@ -76,8 +76,8 @@ namespace Blight.IntegrationTests
 
             LoginUserDto userExample = new LoginUserDto
             {
-                Email = "test@example.com",
-                Password = "Test123!",
+                Email = "admin@example.com",
+                Password = "Admin123!",
             };
             HttpContent httpContent = userExample.ToJsonHttpContent();
 

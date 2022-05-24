@@ -15,6 +15,7 @@ namespace Blight.UnitTests
         public static async Task<BlightDbContext> GetNewDataBaseContext()
         {
             //Używam globalnego identyfikatora, aby każdy (async)test używał własnej instancji DbContext.
+            //Using GUID to provide unique dbContext instance for every test.
 
             var options = new DbContextOptionsBuilder<BlightDbContext>()
                     .UseInMemoryDatabase(Guid.NewGuid().ToString())
@@ -22,26 +23,12 @@ namespace Blight.UnitTests
             var databaseContext = new BlightDbContext(options);
             databaseContext.Database.EnsureCreated();
 
-            bool userExists = await databaseContext.Users.AnyAsync();
             bool phoneExists = await databaseContext.PhoneNumbers.AnyAsync();
 
-            if (!userExists && !phoneExists)
+            if (!phoneExists)
             {
                 for (int i = 1; i < 4; i++)
                 {
-                    await databaseContext.Users.AddAsync(new User()
-                    {
-                        FirstName = "testName" + i,
-                        LastName = "testName" + i,
-                        Email = $"test{i}@test.com",
-                        DateOfBirth = DateTime.Parse("1999-12-01"),
-                        Nationality = "test",
-                        Password = "sad325sadcd5fds5d5",
-                        RoleId = i % 2 == 1 ? 1 : 2,
-                        BlockedNumbers = new List<PhoneNumber>(),
-                        Banned = i % 2 == 0 ? true : false,
-
-                    });
                     await databaseContext.PhoneNumbers.AddAsync(new PhoneNumber()
                     {
                         Prefix = $"4{i}",
@@ -66,8 +53,23 @@ namespace Blight.UnitTests
                     IsBullyTreshold = 2,
 
                 });
-                await databaseContext.SaveChangesAsync();
+                //await databaseContext.SaveChangesAsync();
             }
+            await databaseContext.Users.AddAsync(new User
+            {
+                FirstName = "tester",
+                LastName = "tester",
+                Email = $"test@test.com",
+                DateOfBirth = DateTime.Parse("1999-12-01"),
+                Nationality = "test",
+                Password = "sad325sadcd5fds5d5",
+                RoleId = 3,
+                BlockedNumbers = new List<PhoneNumber>(),
+                Banned = true,
+
+            });
+            await databaseContext.SaveChangesAsync();
+
             return databaseContext;
 
         }

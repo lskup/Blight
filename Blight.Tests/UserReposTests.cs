@@ -94,7 +94,7 @@ namespace Blight.UnitTests
 
 
             stubbedUser.Setup(x => x.GetUserId)
-                       .Returns(1);
+                       .Returns(3);
 
             UserRepos userRepos = new UserRepos(_dbContext, null,null,null,
                     stubbedUser.Object,null,null);
@@ -184,7 +184,7 @@ namespace Blight.UnitTests
 
 
             stubbedUser.Setup(x => x.GetUserId)
-                       .Returns(1);
+                       .Returns(3);
 
             UserRepos userRepos = new UserRepos(_dbContext, null, null, null,
                 stubbedUser.Object,null,null);
@@ -194,7 +194,7 @@ namespace Blight.UnitTests
 
             // Assert
             var caughtException = Assert.ThrowsAsync<ForbiddenException>(action);
-            Assert.Equal("You have not authority for this action", caughtException.Result.Message);
+            Assert.Equal("Action forbidden", caughtException.Result.Message);
         }
 
         [Fact]

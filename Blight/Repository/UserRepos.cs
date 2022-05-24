@@ -104,9 +104,9 @@ namespace Blight.Repository
 
             var token = _schemeGenerator.GenerateJWT(existingUser);
 
-            if(existingUser.RoleId == 2)
+            if(existingUser.RoleId != 3)
             {
-                _logger.LogWarning($"{existingUser.Email} with IP:{_userContextService.GetUserIP} logged in as Admin");
+                _logger.LogWarning($"{existingUser.Email} with IP:{_userContextService.GetUserIP} logged in as {existingUser.Role}");
             }
             return token;
         }
@@ -171,7 +171,7 @@ namespace Blight.Repository
 
         public async override Task<IDto> GetById(int id)
         {
-            if(activeUser.RoleId ==1)
+            if(activeUser.RoleId ==3)
             {
                 if(activeUser.Id != id)
                 {
@@ -197,9 +197,12 @@ namespace Blight.Repository
 
         public async override Task Delete(int id)
         {
-            if (id != activeUser.Id)
+            if (activeUser.RoleId != 1)
             {
-                throw new ForbiddenException("You have not authority for this action");
+                if (activeUser.Id != id)
+                {
+                    throw new ForbiddenException("Action forbidden");
+                }
             }
 
             var entity = await FindElement(x => x.Id == id);
