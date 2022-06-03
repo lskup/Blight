@@ -7,7 +7,7 @@ using Blight.Interfaces;
 
 namespace Blight.Models
 {
-    public class PhoneNumberViewModel:IDto
+    public class PhoneNumberViewModel:IPhoneNumberDto
     {
         public string Prefix { get; set; }
         public string Number { get; set; }

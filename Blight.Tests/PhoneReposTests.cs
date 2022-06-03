@@ -62,7 +62,7 @@ namespace Blight.UnitTests
         {
             // Arrange
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
-            PhoneRepos phoneRepos = new PhoneRepos(_dbContext, null,null);
+            PhoneRepos phoneRepos = new PhoneRepos(_dbContext, null,null,null,null,null,null);
 
             // Act
             var action = async () => await phoneRepos.GetById(id);
@@ -90,7 +90,7 @@ namespace Blight.UnitTests
             stubbedUser.Setup(x => x.GetUserId)
                 .Returns(1);
 
-            PhoneRepos phoneRepos = new PhoneRepos(_dbContext, stubbedMapper.Object,stubbedUser.Object);
+            PhoneRepos phoneRepos = new PhoneRepos(_dbContext, stubbedMapper.Object,stubbedUser.Object, null,null, null, null);
 
             // Act
             var result = await phoneRepos.Create(null);
@@ -115,7 +115,7 @@ namespace Blight.UnitTests
             stubbedUser.Setup(x => x.GetUserId)
                        .Returns(3);
 
-            PhoneRepos phoneRepos = new PhoneRepos(_dbContext, mapper.Object,stubbedUser.Object);
+            PhoneRepos phoneRepos = new PhoneRepos(_dbContext, mapper.Object,stubbedUser.Object, null, null, null, null);
 
             // Act
             var action = async ()=> await phoneRepos.Create(null);
@@ -139,7 +139,7 @@ namespace Blight.UnitTests
             stubbedUser.Setup(x => x.GetUserId)
                        .Returns(4);
 
-            PhoneRepos phoneRepos = new PhoneRepos(_dbContext, mapper.Object, stubbedUser.Object);
+            PhoneRepos phoneRepos = new PhoneRepos(_dbContext, mapper.Object, stubbedUser.Object, null, null, null, null);
 
             // Act
             var action = async () => await phoneRepos.Create(null);
@@ -161,9 +161,9 @@ namespace Blight.UnitTests
 
             mapper.SetReturnsDefault(existingNumber);
             stubbedUser.Setup(x => x.GetUserId)
-                       .Returns(1);
+                       .Returns(3);
 
-            PhoneRepos phoneRepos = new PhoneRepos(_dbContext, mapper.Object, stubbedUser.Object);
+            PhoneRepos phoneRepos = new PhoneRepos(_dbContext, mapper.Object, stubbedUser.Object, null, null, null, null);
 
             // Act
             var action = async () => await phoneRepos.Delete(2);
@@ -179,7 +179,7 @@ namespace Blight.UnitTests
             // Arrange
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
 
-            PhoneRepos phoneRepos = new PhoneRepos(_dbContext, null, null);
+            PhoneRepos phoneRepos = new PhoneRepos(_dbContext, null, null, null, null, null, null);
 
             // Act
             var setNewTreshold = await phoneRepos.SetIsBullyTreshold(4,10);
@@ -188,7 +188,6 @@ namespace Blight.UnitTests
             // Assert
             Assert.NotNull(phoneNumber);
             Assert.Equal(10, phoneNumber.IsBullyTreshold);
-            Assert.Equal(false, phoneNumber.IsBully);
 
         }
         [Fact]
@@ -197,7 +196,7 @@ namespace Blight.UnitTests
             // Arrange
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
 
-            PhoneRepos phoneRepos = new PhoneRepos(_dbContext, null, null);
+            PhoneRepos phoneRepos = new PhoneRepos(_dbContext, null, null, null, null, null, null);
 
             // Act
             var setNewTreshold = await phoneRepos.SetIsBullyTreshold(4, 1);
@@ -206,7 +205,6 @@ namespace Blight.UnitTests
             // Assert
             Assert.NotNull(phoneNumber);
             Assert.Equal(1, phoneNumber.IsBullyTreshold);
-            Assert.Equal(true, phoneNumber.IsBully);
 
         }
 

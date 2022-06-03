@@ -18,6 +18,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Blight.Authentication;
 using Blight.Enums;
 using Microsoft.Extensions.Logging;
+using Blight.Interfaces.MethodsProvider;
 
 
 namespace Blight.Repository
@@ -30,9 +31,14 @@ namespace Blight.Repository
         private readonly IUserContextService _userContextService;
         private readonly IAdminPasswordService _adminPasswordService;
         private readonly ILogger<UserRepos> _logger;
+        private readonly ISearchingUserDbSet _searchingUserDbSet;
+        private readonly ISorting<User> _sorting;
+        private readonly IPaginating _paginating;
 
 
-        public UserRepos(BlightDbContext blightDbContext, IMapper mapper, IPasswordHasher<User> passwordHasher, ISchemeGenerator schemeGenerator, IUserContextService userContextService, IAdminPasswordService adminPasswordService, ILogger<UserRepos> logger)
+        public UserRepos(BlightDbContext blightDbContext, IMapper mapper, IPasswordHasher<User> passwordHasher, ISchemeGenerator schemeGenerator,
+            IUserContextService userContextService, IAdminPasswordService adminPasswordService, ILogger<UserRepos> logger,
+            ISearchingUserDbSet searchingUserDbSet, ISorting<User> sorting, IPaginating paginating)
             : base(blightDbContext, mapper)
         {
             _mapper = mapper;
@@ -41,6 +47,9 @@ namespace Blight.Repository
             _userContextService = userContextService;
             _adminPasswordService = adminPasswordService;
             _logger = logger;
+            _searchingUserDbSet = searchingUserDbSet;
+            _sorting = sorting;
+            _paginating = paginating;
         }
         private User? findActiveUser => _blightDbContext
                     .Users
@@ -49,7 +58,7 @@ namespace Blight.Repository
                     .SingleOrDefault(x => x.Id == _userContextService.GetUserId);
 
         private User? activeUser => findActiveUser is null ?
-            throw new ForbiddenException("You have not authority for this action") :
+            throw new ForbiddenException("Action forbidden") :
             findActiveUser;
 
         public override async Task<User> Create(IDto dto)
@@ -106,61 +115,14 @@ namespace Blight.Repository
 
             if(existingUser.RoleId != 3)
             {
-                _logger.LogWarning($"{existingUser.Email} with IP:{_userContextService.GetUserIP} logged in as {existingUser.Role}");
+                _logger.LogWarning($"{existingUser.Email} logged in as {existingUser.Role}");
             }
             return token;
         }
 
-        public override async Task<User> Update(int id, IDto dto)
-        {
-            if(id!=activeUser.Id)
-            {
-                throw new ForbiddenException("You have not authority for this action");
-            }
-
-            var user = dto;
-
-            var existingUser = await FindElement(
-                e => e.Id == id);
-
-            if (existingUser == null)
-            {
-                throw new NotFoundException("User not found");
-            }
-
-            var dtoProperties = user.GetType()
-                .GetProperties();
-
-            var existingUserProperties = existingUser.GetType()
-                .GetProperties();
-
-            for (int i = 0; i < existingUserProperties.Length; i++)
-            {
-                for (int j = 0; j < dtoProperties.Length; j++)
-                {
-                    if(existingUserProperties[i].Name == dtoProperties[j].Name)
-                    {
-                        object? propertyValue = dtoProperties[j].GetValue(user);
-
-                        if(propertyValue != null)
-                        {
-                            existingUserProperties[i].SetValue(existingUser, propertyValue);
-                        }
-                    }
-                }
-            }
-
-            _blightDbContext.Entry(existingUser)
-                .CurrentValues
-                .SetValues(existingUser);
-
-            await _blightDbContext.SaveChangesAsync();
-
-            return existingUser;
-        }
-
         public async override Task<User> FindElement(Expression<Func<User, bool>> predicate)
         {
+
             var result = await _dbSet
                 .Include(p=>p.BlockedNumbers)
                 .Include(x => x.Role)
@@ -189,10 +151,15 @@ namespace Blight.Repository
                 throw new NotFoundException("User not found");
             }
 
-            var result = _mapper.Map<GetByIdUserViewModel>(user);
+            return user;
+        }
+        public async Task<IDto>GetById<T>(int id,T returnedType) where T:IDto
+        {
+            var iDto = await GetById(id);
 
-            return result;
+            var mappedDto = _mapper.Map<T>(iDto);
 
+            return mappedDto;
         }
 
         public async override Task Delete(int id)
@@ -216,51 +183,14 @@ namespace Blight.Repository
             await _blightDbContext.SaveChangesAsync();
         }
 
-        public async override Task<IPagedResult<IDto>> GetAllPaginated(IPagination paginationQuery)
+        public async override Task<IPagedResult<IDto>> GetAllPaginated(IPaginationObj paginationQuery)
         {
-            var paginationObj = paginationQuery as PaginationUserQuery;
 
-            var entryList = _dbSet
-                .AsNoTracking()
-                .Where(r => paginationObj.SearchPhrase == null ||
-                    (r.FirstName.ToLower().Contains(paginationObj.SearchPhrase.ToLower())) ||
-                    (r.LastName.ToLower().Contains(paginationObj.SearchPhrase.ToLower())) ||
-                    (r.Nationality.ToLower().Contains(paginationObj.SearchPhrase.ToLower())));
-                
+            var searchingResult =_searchingUserDbSet.SearchUserDbWithCriteria(_dbSet, paginationQuery);
+            var sortingResult = _sorting.Sort(searchingResult, paginationQuery);
+            var paginationResult = _paginating.Paginate(sortingResult, paginationQuery);
 
-            Dictionary<SortUserBy, Expression<Func<User, object>>> userSortOptions_userProperties_Pairs = new Dictionary<SortUserBy, Expression<Func<User, object>>>
-            {
-                {SortUserBy.FirstName,p=>p.FirstName},
-                {SortUserBy.LastName,p=>p.LastName},
-                {SortUserBy.Nationality,p=>p.Nationality},
-                {SortUserBy.RoleId,p=>p.RoleId},
-            };
-
-            var selected = userSortOptions_userProperties_Pairs[paginationObj.sortUserBy];
-            
-            entryList = paginationObj.sortDirection == SortDirection.Asc
-                                            ? entryList.OrderBy(selected)
-                                            : entryList.OrderByDescending(selected);
-
-            if (paginationObj.onlyBannedUsers == true)
-            {
-                entryList = entryList.Where(x => x.Banned == true);
-            }
-
-
-            var paginatedList = entryList
-                .Skip(paginationObj.PageSize * (paginationObj.PageNumber - 1))
-                .Take(paginationObj.PageSize)
-                .ToList();
-
-            var result = _mapper.Map<IEnumerable<GetAllUserViewModel>>(paginatedList);
-
-            var recordsTotal = entryList.Count();
-
-            var pageResult =
-                new PagedResult<IDto>(result, recordsTotal, paginationObj.PageSize, paginationObj.PageNumber);
-
-            return pageResult;
+            return paginationResult;
 
         }
 
@@ -270,6 +200,10 @@ namespace Blight.Repository
             if (user is null)
             {
                 throw new NotFoundException("User not found");
+            }
+            if(user.RoleId == 1)
+            {
+                throw new ForbiddenException("Action forbidden");
             }
 
             var userStatus = user.Banned;
@@ -283,6 +217,9 @@ namespace Blight.Repository
 
             await _blightDbContext.SaveChangesAsync();    
             string result = $"User {user.ToString()} " + String.Format("{0}",newUserStatus?"banned":"unbanned");
+
+            _logger.LogInformation($"User {user.ToString()} " + String.Format("{0}", newUserStatus ? "banned" : "unbanned" +
+                $"by {activeUser.Email}"));
 
             return result;
         }

@@ -9,7 +9,7 @@ namespace Blight.Interfaces
 {
     public interface IPhoneRepository:IGenericRepository<PhoneNumber>
     {
-        Task<IPagedResult<IDto>> GetUserAllBlockedNumbers(IPagination paginationQuery);
+        Task<IPagedResult<IDto>> GetUserAllBlockedNumbers(IPaginationObj paginationQuery);
         Task<string> SetIsBullyTreshold(int id, int treshold);
         Task<IEnumerable<IDto>> SyncBlockedNumbers(IEnumerable<IDto> userBlockedNumbers);
         Task<IEnumerable<IDto>> GetAllBullyNumbersDto();

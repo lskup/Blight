@@ -7,29 +7,12 @@ using Blight.Interfaces;
 
 namespace Blight.Entieties
 {
-    public class PhoneNumber:IDto
+    public class PhoneNumber:IDto,IEntity
     {
         public int Id { get; set; }
         public string Prefix { get; set; }
         public string Number { get; set; }
-        public int? Notified { get { return Users.Count; } }
-        public bool? IsBully
-        {
-            get
-            {
-                if(Notified >IsBullyTreshold)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
-
         public int IsBullyTreshold { get; set; } = 20;
-
         public virtual ICollection<User> Users { get; set; }
 
     }

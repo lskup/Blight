@@ -7,7 +7,7 @@ using Blight.Interfaces;
 
 namespace Blight.Models
 {
-    public class PaginationQuery:IPagination
+    public class PaginationQuery:IPaginationObj
     {
         public string? SearchPhrase { get; set; } = null;
         public int PageNumber { get; set; } = 1;

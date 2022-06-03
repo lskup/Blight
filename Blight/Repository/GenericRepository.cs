@@ -60,12 +60,13 @@ namespace Blight.Repository
 
         public virtual async Task<T> FindElement(Expression<Func<T, bool>> predicate)
         {
-            var result = await _dbSet.FirstOrDefaultAsync(predicate);
+            var result = await _dbSet
+                .FirstOrDefaultAsync(predicate);
 
             return result;
         }
 
-        public virtual async Task<IPagedResult<IDto>> GetAllPaginated(IPagination paginationQuery)
+        public virtual async Task<IPagedResult<IDto>> GetAllPaginated(IPaginationObj paginationQuery)
         {
             var paginationObj = paginationQuery as PaginationQuery;
 
@@ -96,9 +97,50 @@ namespace Blight.Repository
             return result;
         }
 
-        public virtual Task<T> Update(int id, IDto dto)
+        public async Task<P> GetById<P>(int id) where P : IDto
         {
-            throw new NotImplementedException();
+            var iDto = await GetById(id);
+
+            var mappedDto = _mapper.Map<P>(iDto);
+
+            return mappedDto;
+        }
+
+
+        public virtual async Task<IDto> Update(int id, IDto dto)
+        {
+            var objExistingInDb = await GetById(id);
+
+            var dtoProperties = dto.GetType()
+                .GetProperties();
+
+            var existingObjProperties = objExistingInDb.GetType()
+                .GetProperties();
+
+            for (int i = 0; i < existingObjProperties.Length; i++)
+            {
+                for (int j = 0; j < dtoProperties.Length; j++)
+                {
+                    if (existingObjProperties[i].Name == dtoProperties[j].Name)
+                    {
+                        object? propertyValue = dtoProperties[j].GetValue(dto);
+
+                        if (propertyValue != null)
+                        {
+                            existingObjProperties[i].SetValue(objExistingInDb, propertyValue);
+                        }
+                    }
+                }
+            }
+
+            _blightDbContext.Entry(objExistingInDb)
+                .CurrentValues
+                .SetValues(objExistingInDb);
+
+            await _blightDbContext.SaveChangesAsync();
+
+            return objExistingInDb;
+
         }
 
     }

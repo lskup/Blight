@@ -97,7 +97,7 @@ namespace Blight.UnitTests
                        .Returns(3);
 
             UserRepos userRepos = new UserRepos(_dbContext, null,null,null,
-                    stubbedUser.Object,null,null);
+                    stubbedUser.Object,null,null,null,null,null);
 
             // Act
             var action = async () => await userRepos.GetById(id);
@@ -129,7 +129,7 @@ namespace Blight.UnitTests
             adminService.SetReturnsDefault("Admin123!");
 
             UserRepos userRepos = new UserRepos(_dbContext, mapper.Object,hasher.Object
-                ,null,null,adminService.Object,logger.Object);
+                ,null,null,adminService.Object,logger.Object, null, null, null);
 
             // Act
             var user = await userRepos.Create(null);
@@ -137,7 +137,7 @@ namespace Blight.UnitTests
             // Assert
             Assert.NotNull(user);
             Assert.Equal("testUser0", user.FirstName);
-            Assert.Equal(4, _dbContext.Users.Count());
+            Assert.Equal(5, _dbContext.Users.Count());
             Assert.Equal("testUser0", _dbContext.Users.Last().FirstName);
         }
 
@@ -164,7 +164,7 @@ namespace Blight.UnitTests
             adminService.SetReturnsDefault("Admin123!");
 
             UserRepos userRepos = new UserRepos(_dbContext, mapper.Object, hasher.Object,
-                null,null,adminService.Object,logger.Object);
+                null,null,adminService.Object,logger.Object, null, null, null);
 
             // Act
             var user = await userRepos.Create(null);
@@ -187,7 +187,7 @@ namespace Blight.UnitTests
                        .Returns(3);
 
             UserRepos userRepos = new UserRepos(_dbContext, null, null, null,
-                stubbedUser.Object,null,null);
+                stubbedUser.Object,null,null, null, null, null);
 
             // Act
             var action = async () => await userRepos.Delete(id);
@@ -211,23 +211,23 @@ namespace Blight.UnitTests
                 Nationality = "Germany"
             };
             stubbedUser.Setup(x => x.GetUserId)
-                       .Returns(1);
+                       .Returns(4);
 
 
             UserRepos userRepos = new UserRepos(_dbContext, null,null,null,
-                stubbedUser.Object,null,null);
+                stubbedUser.Object,null,null, null, null, null);
 
             // Act
-            var updatedUser = await userRepos.Update(1,userDto);
+            var updatedUser = await userRepos.Update(4,userDto) as User;
+            
 
             // Assert
             Assert.NotNull(updatedUser);
             Assert.Equal("Martin", updatedUser.FirstName);
-            Assert.Equal("Martin", _dbContext.Users.First().FirstName);
         }
 
         [Fact]
-        public async Task Update_OtherUser_ThrowForbiddenException()
+        public async Task Update_UserForceUpdateOtherUser_ThrowForbiddenException()
         {
             // Arrange
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
@@ -240,17 +240,17 @@ namespace Blight.UnitTests
                 Nationality = "Germany"
             };
             stubbedUser.Setup(x => x.GetUserId)
-                       .Returns(1);
+                       .Returns(3);
 
             UserRepos userRepos = new UserRepos(_dbContext, null, null,null,
-                stubbedUser.Object,null,null);
+                stubbedUser.Object,null,null, null, null, null);
 
             // Act
             var action =async() => await userRepos.Update(10, userDto);
 
             // Assert
             var caughtException = Assert.ThrowsAsync<ForbiddenException>(action);
-            Assert.Equal("You have not authority for this action", caughtException.Result.Message);
+            Assert.Equal("Action forbidden", caughtException.Result.Message);
         }
 
         [Fact]
@@ -258,12 +258,13 @@ namespace Blight.UnitTests
         {
             // Arrange
             var _dbContext = await InMemoryDataBaseFixture.GetNewDataBaseContext();
+            var stubLogger = LoggerHelper.GetLogger<UserRepos>();
 
             UserRepos userRepos = new UserRepos(_dbContext, null, null, null,
-                null,null,null);
+                null,null,stubLogger.Object, null, null, null);
 
             // Act
-            var result = await userRepos.BanUser_Change(1);
+            var result = await userRepos.BanUser_Change(3);
 
             // Assert
             Assert.NotNull(result);

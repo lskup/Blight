@@ -34,7 +34,7 @@ namespace Blight.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> Get(int id)
+        public async Task<ActionResult<GetByIdUserViewModel>> Get(int id)
         {
             var result = await _userRepos.GetById(id);
 

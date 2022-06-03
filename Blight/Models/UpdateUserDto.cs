@@ -10,9 +10,13 @@ namespace Blight.Models
 {
     public class UpdateUserDto:IDto
     {
+        [Required]
         public string FirstName { get; set; }
+        [Required]
         public string LastName { get; set; }
+        [Required]
         public DateTime? DateOfBirth { get; set; }
+        [Required]
         public string Nationality { get; set; }
 
     }

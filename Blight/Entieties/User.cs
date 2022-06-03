@@ -7,7 +7,7 @@ using Blight.Interfaces;
 
 namespace Blight.Entieties
 {
-    public class User:IDto
+    public class User:IDto,IEntity
     {
         public int Id { get; set; }
         public string FirstName { get; set; }
@@ -18,7 +18,7 @@ namespace Blight.Entieties
         public string Password { get; set; }
         public virtual ICollection<PhoneNumber> BlockedNumbers { get; set; }
         public int RoleId { get; set; } = 3;
-        public Role Role { get; set; }
+        public virtual Role Role { get; set; }
         public bool Banned { get; set; }
 
         public override string ToString()

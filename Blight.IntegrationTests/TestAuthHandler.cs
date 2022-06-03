@@ -24,7 +24,9 @@ namespace Blight.IntegrationTests
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier,"1"),
-                new Claim(ClaimTypes.Name, "Admin"),
+                new Claim(ClaimTypes.Name, "Master"),
+                new Claim(ClaimTypes.Role, "Master")
+
             };
             var identity = new ClaimsIdentity(claims, "Test");
             var principal = new ClaimsPrincipal(identity);

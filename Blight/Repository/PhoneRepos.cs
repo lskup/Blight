@@ -12,6 +12,9 @@ using Blight.Interfaces;
 using AutoMapper;
 using Blight.Models;
 using Blight.Enums;
+using Microsoft.Extensions.Logging;
+using Blight.Interfaces.MethodsProvider;
+using Blight.Services.MethodProvider.SearchingDb;
 
 namespace Blight.Repository
 {
@@ -19,12 +22,20 @@ namespace Blight.Repository
     {
         private readonly IMapper _mapper;
         private readonly IUserContextService _userContextService;
+        private readonly ILogger<PhoneRepos> _logger;
+        private readonly ISearchingPhoneDbSet _searchingPhoneDb;
+        private readonly ISorting<PhoneNumber> _sorting;
+        private readonly IPaginating _paginating;
 
-
-        public PhoneRepos(BlightDbContext blightDbContext, IMapper mapper, IUserContextService userContextService) : base(blightDbContext, mapper)
+        public PhoneRepos(BlightDbContext blightDbContext, IMapper mapper, IUserContextService userContextService, ILogger<PhoneRepos> logger,
+               ISorting<PhoneNumber> sorting, IPaginating paginating, ISearchingPhoneDbSet searchingPhoneDb) : base(blightDbContext, mapper)
         {
             _mapper = mapper;
             _userContextService = userContextService;
+            _logger = logger;
+            _sorting = sorting;
+            _paginating = paginating;
+            _searchingPhoneDb = searchingPhoneDb;
         }
         private User? findActiveUser => _blightDbContext
                     .Users
@@ -36,82 +47,23 @@ namespace Blight.Repository
             throw new ForbiddenException("You have not authority for this action") :
             findActiveUser;
 
-        public async override Task<IPagedResult<IDto>> GetAllPaginated(IPagination paginationPhoneQuery)
+        public async override Task<IPagedResult<IDto>> GetAllPaginated(IPaginationObj paginationPhoneQuery)
         {
-            var paginationPhoneObj = paginationPhoneQuery as PaginationPhoneQuery;
+            var dbResult =_searchingPhoneDb.SearchPhoneDbWithCriteria(_blightDbContext.PhoneNumbers, paginationPhoneQuery);
+            var sortingResult = _sorting.Sort(dbResult,paginationPhoneQuery);
+            var paginationResult = _paginating.Paginate(sortingResult, paginationPhoneQuery);
 
-            var entryList = _dbSet
-                .Include(x => x.Users)
-                .AsNoTracking()
-                .Where(r => paginationPhoneObj.SearchPhrase == null ||
-                                        (r.Number.Contains(paginationPhoneObj.SearchPhrase)) ||
-                                        (r.Prefix.Contains(paginationPhoneObj.SearchPhrase)));
-
-            switch (paginationPhoneObj.sortDirection)
-            {
-                case SortDirection.Asc:
-                    {
-                        entryList = entryList.OrderBy(x => x.Notified);
-                        break;
-                    }
-                case SortDirection.Desc:
-                    {
-                        entryList = entryList.OrderByDescending(x => x.Notified);
-                        break;
-                    }
-                default:
-                    {
-                        break;
-                    }
-            }
-
-            if (paginationPhoneObj.onlyBullyNumbers ==true)
-            {
-                entryList = entryList.Where(x => x.IsBully == true);
-            }
-
-            var paginatedList = entryList
-                .Skip(paginationPhoneObj.PageSize * (paginationPhoneObj.PageNumber - 1))
-                .Take(paginationPhoneObj.PageSize)
-                .ToList();
-
-            IEnumerable<IDto> mappedList;
-
-            if (activeUser.RoleId==2)
-            {
-                mappedList = _mapper.Map<IEnumerable<AdminPhoneNumberViewModel>>(paginatedList);
-            }
-
-            else
-            {
-                mappedList = _mapper.Map<IEnumerable<PhoneNumberViewModel>>(paginatedList);
-            }
-
-            var recordsTotal = entryList.Count();
-
-            var pageResult =
-                new PagedResult<IDto>(mappedList, recordsTotal, paginationPhoneObj.PageSize, paginationPhoneObj.PageNumber);
-
-            return pageResult;
+            return paginationResult;
         }
-        public async Task<IPagedResult<IDto>> GetUserAllBlockedNumbers(IPagination paginationQuery)
+        public async Task<IPagedResult<IDto>> GetUserAllBlockedNumbers(IPaginationObj paginationQuery)
         {
-            var paginationObj = paginationQuery as PaginationQuery;
             var blockedNumbers = activeUser.BlockedNumbers;
+            var mappedCollection = _mapper.Map<ICollection<PhoneNumberViewModel>>(blockedNumbers);
+            var queryable = mappedCollection.AsQueryable();
+            
+            var paginationResult = _paginating.Paginate(queryable, paginationQuery);
 
-            var paginatedList = blockedNumbers
-                .Skip(paginationObj.PageSize * (paginationObj.PageNumber - 1))
-                .Take(paginationObj.PageSize)
-                .ToList();
-
-            var result = _mapper.Map<List<PhoneNumberViewModel>>(blockedNumbers);
-
-            var recordsTotal = paginatedList.Count();
-
-            var pageResult =
-                new PagedResult<IDto>(result, recordsTotal, paginationObj.PageSize, paginationObj.PageNumber);
-
-            return pageResult;
+            return paginationResult;
         }
 
         public async override Task<PhoneNumber> FindElement(Expression<Func<PhoneNumber, bool>> predicate)
@@ -172,9 +124,7 @@ namespace Blight.Repository
                 throw new NotFoundException("Number not found");
             }
 
-            var userRole = activeUser.RoleId;
-
-            if(userRole == 1)
+            if(activeUser.RoleId >1)
             {
                 var phoneNumberinUserBlockedList = activeUser
                                 .BlockedNumbers
@@ -186,7 +136,7 @@ namespace Blight.Repository
                 activeUser.BlockedNumbers.Remove(phoneNumberinUserBlockedList);
 
             }
-            if(userRole ==2)
+            else
             {
                 _dbSet.Remove(phoneNumber);
             }
@@ -204,7 +154,7 @@ namespace Blight.Repository
                 throw new NotFoundException("Number not found");
             }
 
-            if(activeUser.RoleId ==2)
+            if(activeUser.RoleId <3)
             {
                 return _mapper.Map<AdminPhoneNumberViewModel>(element); ;
             }

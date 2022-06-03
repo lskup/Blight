@@ -29,6 +29,12 @@ using Blight.Authentication;
 using Blight.Services;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
+using Microsoft.EntityFrameworkCore.Proxies;
+using Blight.Interfaces.MethodsProvider;
+using Blight.Services.MethodProvider;
+using Blight.Services.MethodProvider.SearchingDb.Shared;
+using Microsoft.AspNetCore.Http;
+using Blight.Services.MethodProvider.SearchingDb;
 
 namespace Blight
 {
@@ -100,7 +106,9 @@ namespace Blight
                 });
             });
             services.AddDbContext<BlightDbContext>(cfg =>
-                cfg.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+                cfg.LogTo(Console.WriteLine,LogLevel.Information)
+                   .UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
             services.AddAutoMapper(typeof(Startup));
             services.AddScoped<ErrorHandlingMiddleware>();
             services.AddScoped<IValidator<RegisterUserDto>, RegisterUserDtoValidator>();
@@ -114,6 +122,22 @@ namespace Blight
             services.AddScoped<IUserContextService, UserContextService>();
             services.AddScoped<IAdminPasswordService, AdminPasswordService>();
             services.AddHttpContextAccessor();
+            services.AddScoped<IPaginating, PaginatingMethod>();
+            services.AddScoped<ISorting<PhoneNumber>, SortingIPhoneDto>();
+            services.AddScoped<ISorting<User>, SortingIUserDto>();
+            services.AddScoped<ISearchingUserDbSet, SearchingUserDb>();
+            services.AddScoped<ISearchingPhoneDbSet>(provider =>
+            {
+                var userContextService = provider.GetService<IUserContextService>();
+                var userRole = userContextService.GetUserRole;
+
+                if (userRole == "User")
+                    return new UserSearchingPhoneDb();
+                else if (userRole == "Admin" || userRole == "Master")
+                    return new AdminSearchingPhoneDb();
+                else
+                    return null;
+            });
 
         }
 

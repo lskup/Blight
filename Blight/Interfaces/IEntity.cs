@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace Blight.Interfaces
 {
-    public interface IPagination
+    public interface IEntity
     {
-
     }
 }
