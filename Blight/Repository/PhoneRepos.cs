@@ -207,13 +207,15 @@ namespace Blight.Repository
         public async Task<IEnumerable<IDto>> GetAllBullyNumbersDto()
         {
             var allBlockedNumbers = await _dbSet
-                    .Include(o => o.Users)
                     .Where(x=>x.Users.Count >= x.IsBullyTreshold)
+                    .Select(p=>new PhoneNumberDto
+                    {
+                        Prefix = p.Prefix,
+                        Number = p.Number,
+                    })
                     .ToListAsync();
 
-            var dtos = _mapper.Map<List<PhoneNumberDto>>(allBlockedNumbers);
-
-            return dtos;
+            return allBlockedNumbers;
         }
     }
 }
