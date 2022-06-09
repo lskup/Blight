@@ -39,7 +39,7 @@ namespace Blight.Repository
         public UserRepos(BlightDbContext blightDbContext, IMapper mapper, IPasswordHasher<User> passwordHasher, ISchemeGenerator schemeGenerator,
             IUserContextService userContextService, IAdminPasswordService adminPasswordService, ILogger<UserRepos> logger,
             ISearchingUserDbSet searchingUserDbSet, ISorting<User> sorting, IPaginating paginating)
-            : base(blightDbContext, mapper)
+            : base(blightDbContext, mapper,paginating)
         {
             _mapper = mapper;
             _passwordHasher = passwordHasher;

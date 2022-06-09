@@ -28,7 +28,7 @@ namespace Blight.Repository
         private readonly IPaginating _paginating;
 
         public PhoneRepos(BlightDbContext blightDbContext, IMapper mapper, IUserContextService userContextService, ILogger<PhoneRepos> logger,
-               ISorting<PhoneNumber> sorting, IPaginating paginating, ISearchingPhoneDbSet searchingPhoneDb) : base(blightDbContext, mapper)
+               ISorting<PhoneNumber> sorting, IPaginating paginating, ISearchingPhoneDbSet searchingPhoneDb) : base(blightDbContext, mapper,paginating)
         {
             _mapper = mapper;
             _userContextService = userContextService;

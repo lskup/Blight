@@ -53,7 +53,6 @@ namespace Blight.Controllers
             return Ok(await _phoneNumberRepos2.SyncBlockedNumbers(userBlockedNumbers));
         }
 
-
         [HttpGet("{id}")]
         public async Task<ActionResult<PhoneNumberDto>> Get(int id)
         {
@@ -71,7 +70,6 @@ namespace Blight.Controllers
                 nameof(Get),
                 new { id = result.Id },
                 result);
-
         }
 
         [HttpDelete("{id}")]

@@ -12,6 +12,7 @@ using Blight.Exceptions;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Blight.Models;
+using Blight.Interfaces.MethodsProvider;
 
 namespace Blight.Repository
 {
@@ -20,12 +21,14 @@ namespace Blight.Repository
         protected readonly BlightDbContext _blightDbContext;
         internal DbSet<T> _dbSet;
         private readonly IMapper _mapper;
+        private readonly IPaginating _pagination;
 
-        public GenericRepository(BlightDbContext blightDbContext, IMapper mapper)
+        public GenericRepository(BlightDbContext blightDbContext, IMapper mapper, IPaginating pagination)
         {
             _blightDbContext = blightDbContext;
             _dbSet = _blightDbContext.Set<T>();
             _mapper = mapper;
+            _pagination = pagination;
         }
 
         public virtual async Task<T> Create(IDto dto)
@@ -70,18 +73,11 @@ namespace Blight.Repository
         {
             var paginationObj = paginationQuery as PaginationQuery;
 
-            var list = await _dbSet
+            var list = _dbSet
                 .AsNoTracking()
-                .ToListAsync();
+                .AsQueryable();
 
-            var paginatedList = list
-                    .Skip(paginationObj.PageSize * (paginationObj.PageNumber - 1))
-                    .Take(paginationObj.PageSize)
-                    .ToList();
-
-            var recordsTotal = list.Count();
-
-            var pagedResult = new PagedResult<IDto>(paginatedList, recordsTotal, paginationObj.PageSize, paginationObj.PageNumber);
+            var pagedResult = _pagination.Paginate(list, paginationQuery);
 
             return pagedResult;
         }
