@@ -53,7 +53,6 @@ namespace Blight
             var authenticationSettings = new AuthenticationSettings();
             Configuration.GetSection("Authentication").Bind(authenticationSettings);
 
-            
             services.AddSingleton(authenticationSettings);
             services.AddSingleton<IConfiguration>(Configuration);
             services
@@ -75,8 +74,11 @@ namespace Blight
                     .AddNewtonsoftJson(opt=>
                     opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore)
                     .AddFluentValidation();
-                    
 
+            services.AddCors(options => options.AddDefaultPolicy(
+                policy => policy.WithOrigins(Configuration["AllowedCORSOrigin"])
+                                           .AllowAnyHeader()
+                                           .AllowAnyMethod()));
             services.AddSwaggerGen(opt =>
             {
                 opt.SwaggerDoc("v1", new OpenApiInfo { Title = "Blight", Version = "v1" });
@@ -144,7 +146,7 @@ namespace Blight
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseResponseCaching();
+            //app.UseResponseCaching();
 
             if (env.IsDevelopment())
             {
@@ -160,6 +162,8 @@ namespace Blight
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors();
 
             app.UseAuthorization();
 
